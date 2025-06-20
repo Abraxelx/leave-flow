@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<HBox spacing="10" xmlns:fx="http://javafx.com/fxml" fx:controller="com.halilsahin.leaveflow.ui.UpdateHolidayController">
+    <padding>
+        <Insets top="20" right="20" bottom="20" left="20"/>
+    </padding>
+    <TextField fx:id="yearField" promptText="Yıl"/>
+    <Button text="Güncelle" onAction="#onUpdate"/>
+</HBox> 

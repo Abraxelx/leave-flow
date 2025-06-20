@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<VBox spacing="0" xmlns:fx="http://javafx.com/fxml" fx:controller="com.halilsahin.leaveflow.ui.MainController">
+    <padding>
+        <Insets bottom="10" left="10" right="10" top="10" />
+    </padding>
+
+    <!-- Başlık -->
+    <HBox alignment="CENTER_LEFT" spacing="10" style="-fx-background-color: #2196F3; -fx-padding: 15; -fx-background-radius: 5;">
+        <Label style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: white;" text="İzin Yönetim Sistemi" />
+        <Region HBox.hgrow="ALWAYS" />
+        <Button fx:id="quickAddButton" onAction="#onQuickAddLeave" style="-fx-background-color: #4CAF50; -fx-text-fill: white; -fx-font-weight: bold;" text="+ Hızlı İzin Ekle" />
+    </HBox>
+
+    <!-- Tab Pane -->
+    <TabPane fx:id="mainTabPane" VBox.vgrow="ALWAYS" style="-fx-background-color: white;">
+        
+        <!-- Çalışanlar Tab -->
+        <Tab text="👥 Çalışanlar" closable="false">
+            <VBox spacing="15">
+                <padding>
+                    <Insets bottom="15" left="15" right="15" top="15" />
+                </padding>
+                
+                <!-- Çalışan Listesi -->
+                <VBox spacing="10">
+                    <HBox alignment="CENTER_LEFT" spacing="10">
+                        <Label style="-fx-font-size: 18px; -fx-font-weight: bold;" text="Çalışan Listesi" />
+                        <Region HBox.hgrow="ALWAYS" />
+                        <Button onAction="#onAddEmployee" style="-fx-background-color: #2196F3; -fx-text-fill: white;" text="+ Yeni Çalışan" />
+                    </HBox>
+                    
+                    <TableView fx:id="employeeTable" VBox.vgrow="ALWAYS" style="-fx-background-color: white;">
+                        <columns>
+                            <TableColumn text="ID" fx:id="colId" prefWidth="50" />
+                            <TableColumn text="İsim" fx:id="colName" prefWidth="200" />
+                            <TableColumn text="İşe Giriş" fx:id="hireDateColumn" prefWidth="100" />
+                            <TableColumn text="Hizmet Süresi" fx:id="colServiceYears" prefWidth="100" />
+                            <TableColumn text="Yıllık İzin" fx:id="totalLeaveColumn" prefWidth="100" />
+                            <TableColumn text="Kalan İzin" fx:id="remainingLeaveColumn" prefWidth="100" />
+                            <TableColumn text="İşlemler" fx:id="actionsColumn" prefWidth="120" />
+                        </columns>
+                    </TableView>
+                </VBox>
+            </VBox>
+        </Tab>
+        
+        <!-- İzinler Tab -->
+        <Tab text="📅 İzinler" closable="false">
+            <VBox spacing="15">
+                <padding>
+                    <Insets bottom="15" left="15" right="15" top="15" />
+                </padding>
+                
+                <!-- Filtreler -->
+                <HBox spacing="15" alignment="CENTER_LEFT">
+                    <Label text="Çalışan:" />
+                    <ComboBox fx:id="employeeFilterCombo" prefWidth="200" promptText="Tüm Çalışanlar" />
+                    <Label text="Tarih:" />
+                    <DatePicker fx:id="startDateFilter" prefWidth="150" promptText="Başlangıç" />
+                    <Label text="-" />
+                    <DatePicker fx:id="endDateFilter" prefWidth="150" promptText="Bitiş" />
+                    <Region HBox.hgrow="ALWAYS" />
+                    <Button onAction="#onFilterLeaves" style="-fx-background-color: #2196F3; -fx-text-fill: white;" text="Filtrele" />
+                    <Button onAction="#onClearFilters" style="-fx-background-color: #757575; -fx-text-fill: white;" text="Temizle" />
+                </HBox>
+                
+                <!-- İzin Listesi -->
+                <VBox spacing="10">
+                    <HBox alignment="CENTER_LEFT" spacing="10">
+                        <Label style="-fx-font-size: 18px; -fx-font-weight: bold;" text="İzin Kayıtları" />
+                        <Region HBox.hgrow="ALWAYS" />
+                        <Button onAction="#onExportLeaves" style="-fx-background-color: #4CAF50; -fx-text-fill: white;" text="📊 PDF Raporu" />
+                    </HBox>
+                    
+                    <TableView fx:id="leaveTable" VBox.vgrow="ALWAYS" style="-fx-background-color: white;">
+                        <columns>
+                            <TableColumn text="ID" fx:id="colLeaveId" prefWidth="50" />
+                            <TableColumn text="Çalışan" fx:id="colLeaveEmployee" prefWidth="150" />
+                            <TableColumn text="İzin Türü" fx:id="colLeaveType" prefWidth="120" />
+                            <TableColumn text="Başlangıç" fx:id="colLeaveStart" prefWidth="100" />
+                            <TableColumn text="Bitiş" fx:id="colLeaveEnd" prefWidth="100" />
+                            <TableColumn text="Süre" fx:id="colLeaveDuration" prefWidth="80" />
+                            <TableColumn text="Kalan İzin" fx:id="colLeaveRemaining" prefWidth="100" />
+                            <TableColumn text="İşlemler" fx:id="colLeaveActions" prefWidth="100" />
+                        </columns>
+                    </TableView>
+                </VBox>
+                
+                <!-- İstatistikler -->
+                <HBox spacing="30" alignment="CENTER" style="-fx-background-color: #f5f5f5; -fx-padding: 15; -fx-background-radius: 5;">
+                    <VBox alignment="CENTER" spacing="5">
+                        <Label text="Toplam İzin Günü" style="-fx-font-size: 12px; -fx-text-fill: #666;" />
+                        <Label fx:id="totalDaysLabel" text="0" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #2196F3;" />
+                    </VBox>
+                    <VBox alignment="CENTER" spacing="5">
+                        <Label text="Ortalama Süre" style="-fx-font-size: 12px; -fx-text-fill: #666;" />
+                        <Label fx:id="avgDaysLabel" text="0 gün" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #4CAF50;" />
+                    </VBox>
+                    <VBox alignment="CENTER" spacing="5">
+                        <Label text="Toplam Kayıt" style="-fx-font-size: 12px; -fx-text-fill: #666;" />
+                        <Label fx:id="totalRecordsLabel" text="0" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #FF9800;" />
+                    </VBox>
+                </HBox>
+            </VBox>
+        </Tab>
+        
+        <!-- Raporlar Tab -->
+        <Tab text="📊 Raporlar" closable="false">
+            <VBox spacing="15">
+                <padding>
+                    <Insets bottom="15" left="15" right="15" top="15" />
+                </padding>
+                
+                <!-- Hızlı Raporlar -->
+                <GridPane hgap="20" vgap="20">
+                    <VBox alignment="CENTER" spacing="10" style="-fx-background-color: #e3f2fd; -fx-padding: 20; -fx-background-radius: 10;" GridPane.columnIndex="0" GridPane.rowIndex="0">
+                        <Label text="📄 Genel Rapor" style="-fx-font-size: 16px; -fx-font-weight: bold;" />
+                        <Label text="Tüm izin kayıtları" style="-fx-font-size: 12px; -fx-text-fill: #666;" />
+                        <Button onAction="#onExportGeneralReport" style="-fx-background-color: #2196F3; -fx-text-fill: white;" text="Oluştur" />
+                    </VBox>
+                    
+                    <VBox alignment="CENTER" spacing="10" style="-fx-background-color: #f3e5f5; -fx-padding: 20; -fx-background-radius: 10;" GridPane.columnIndex="1" GridPane.rowIndex="0">
+                        <Label text="👥 Çalışan Raporu" style="-fx-font-size: 16px; -fx-font-weight: bold;" />
+                        <Label text="Çalışan bazlı izinler" style="-fx-font-size: 12px; -fx-text-fill: #666;" />
+                        <Button onAction="#onExportEmployeeReport" style="-fx-background-color: #9C27B0; -fx-text-fill: white;" text="Oluştur" />
+                    </VBox>
+                    
+                    <VBox alignment="CENTER" spacing="10" style="-fx-background-color: #e8f5e8; -fx-padding: 20; -fx-background-radius: 10;" GridPane.columnIndex="0" GridPane.rowIndex="1">
+                        <Label text="📅 Aylık Rapor" style="-fx-font-size: 16px; -fx-font-weight: bold;" />
+                        <Label text="Bu ayın izinleri" style="-fx-font-size: 12px; -fx-text-fill: #666;" />
+                        <Button onAction="#onExportMonthlyReport" style="-fx-background-color: #4CAF50; -fx-text-fill: white;" text="Oluştur" />
+                    </VBox>
+                    
+                    <VBox alignment="CENTER" spacing="10" style="-fx-background-color: #fff3e0; -fx-padding: 20; -fx-background-radius: 10;" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                        <Label text="📈 İstatistik Raporu" style="-fx-font-size: 16px; -fx-font-weight: bold;" />
+                        <Label text="Detaylı analiz" style="-fx-font-size: 12px; -fx-text-fill: #666;" />
+                        <Button onAction="#onExportStatsReport" style="-fx-background-color: #FF9800; -fx-text-fill: white;" text="Oluştur" />
+                    </VBox>
+                </GridPane>
+            </VBox>
+        </Tab>
+        
+        <!-- Ayarlar Tab -->
+        <Tab text="⚙️ Ayarlar" closable="false">
+            <VBox spacing="15">
+                <padding>
+                    <Insets bottom="15" left="15" right="15" top="15" />
+                </padding>
+                
+                <!-- Resmi Tatiller -->
+                <VBox spacing="10" style="-fx-background-color: #f5f5f5; -fx-padding: 15; -fx-background-radius: 5;">
+                    <Label style="-fx-font-size: 16px; -fx-font-weight: bold;" text="Resmi Tatiller" />
+                    <HBox spacing="10" alignment="CENTER_LEFT">
+                        <Label text="Yıl:" />
+                        <TextField fx:id="holidayYearField" prefWidth="100" promptText="2025" />
+                        <Button onAction="#onUpdateHolidays" style="-fx-background-color: #2196F3; -fx-text-fill: white;" text="Güncelle" />
+                        <Label text="(Google Calendar API'den otomatik çeker)" style="-fx-font-size: 12px; -fx-text-fill: #666;" />
+                    </HBox>
+                </VBox>
+                
+                <!-- PDF Ayarları -->
+                <VBox spacing="10" style="-fx-background-color: #f5f5f5; -fx-padding: 15; -fx-background-radius: 5;">
+                    <Label style="-fx-font-size: 16px; -fx-font-weight: bold;" text="PDF Ayarları" />
+                    <HBox spacing="10" alignment="CENTER_LEFT">
+                        <CheckBox fx:id="includeDetailsCheckBox" text="Gün detaylarını dahil et" selected="true" />
+                        <CheckBox fx:id="includeStatsCheckBox" text="İstatistikleri dahil et" selected="true" />
+                    </HBox>
+                </VBox>
+                
+                <!-- Veritabanı -->
+                <VBox spacing="10" style="-fx-background-color: #f5f5f5; -fx-padding: 15; -fx-background-radius: 5;">
+                    <Label style="-fx-font-size: 16px; -fx-font-weight: bold;" text="Veritabanı" />
+                    <HBox spacing="10" alignment="CENTER_LEFT">
+                        <Button onAction="#onBackupDatabase" style="-fx-background-color: #4CAF50; -fx-text-fill: white;" text="Yedekle" />
+                        <Button onAction="#onRestoreDatabase" style="-fx-background-color: #FF9800; -fx-text-fill: white;" text="Geri Yükle" />
+                        <Button onAction="#onResetDatabase" style="-fx-background-color: #f44336; -fx-text-fill: white;" text="Sıfırla" />
+                    </HBox>
+                </VBox>
+            </VBox>
+        </Tab>
+    </TabPane>
+</VBox> 

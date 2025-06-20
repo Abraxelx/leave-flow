@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox spacing="15" xmlns:fx="http://javafx.com/fxml" fx:controller="com.halilsahin.leaveflow.ui.LeaveReportController">
+    <padding>
+        <Insets bottom="20" left="20" right="20" top="20" />
+    </padding>
+
+    <Label style="-fx-font-size: 18px; -fx-font-weight: bold;" text="İzin Raporları" />
+
+    <!-- Filtreler -->
+    <VBox spacing="10" style="-fx-background-color: #f5f5f5; -fx-padding: 15; -fx-background-radius: 5;">
+        <Label style="-fx-font-weight: bold;" text="Filtreler" />
+        
+        <GridPane hgap="10" vgap="10">
+            <Label text="Çalışan:" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+            <ComboBox fx:id="employeeFilterCombo" prefWidth="200" promptText="Tüm Çalışanlar" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+
+            <Label text="İzin Türü:" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+            <ComboBox fx:id="leaveTypeFilterCombo" prefWidth="200" promptText="Tüm İzin Türleri" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+
+            <Label text="Başlangıç Tarihi:" GridPane.columnIndex="0" GridPane.rowIndex="2" />
+            <DatePicker fx:id="startDateFilter" prefWidth="200" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+
+            <Label text="Bitiş Tarihi:" GridPane.columnIndex="0" GridPane.rowIndex="3" />
+            <DatePicker fx:id="endDateFilter" prefWidth="200" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+        </GridPane>
+
+        <HBox alignment="CENTER_RIGHT" spacing="10">
+            <Button onAction="#onFilter" style="-fx-background-color: #2196F3; -fx-text-fill: white;" text="Filtrele" />
+            <Button onAction="#onClearFilters" style="-fx-background-color: #757575; -fx-text-fill: white;" text="Filtreleri Temizle" />
+        </HBox>
+    </VBox>
+
+    <!-- İstatistikler -->
+    <VBox spacing="10" style="-fx-background-color: #e3f2fd; -fx-padding: 15; -fx-background-radius: 5;">
+        <Label style="-fx-font-weight: bold;" text="İstatistikler" />
+        
+        <GridPane hgap="20" vgap="5">
+            <Label text="Toplam İzin Günü:" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+            <Label fx:id="totalDaysLabel" style="-fx-font-weight: bold; -fx-text-fill: #1976D2;" text="0" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+
+            <Label text="Ortalama İzin Süresi:" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+            <Label fx:id="avgDaysLabel" style="-fx-font-weight: bold; -fx-text-fill: #1976D2;" text="0 gün" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+
+            <Label text="En Çok İzin Kullanan:" GridPane.columnIndex="0" GridPane.rowIndex="2" />
+            <Label fx:id="topEmployeeLabel" style="-fx-font-weight: bold; -fx-text-fill: #1976D2;" text="-" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+
+            <Label text="Toplam Kayıt Sayısı:" GridPane.columnIndex="0" GridPane.rowIndex="3" />
+            <Label fx:id="totalRecordsLabel" style="-fx-font-weight: bold; -fx-text-fill: #1976D2;" text="0" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+        </GridPane>
+    </VBox>
+
+    <!-- İzin Listesi -->
+    <VBox spacing="10">
+        <HBox alignment="CENTER_LEFT" spacing="10">
+            <Label style="-fx-font-weight: bold;" text="İzin Kayıtları" />
+            <Button onAction="#onExport" style="-fx-background-color: #4CAF50; -fx-text-fill: white;" text="Dışa Aktar" />
+        </HBox>
+        
+        <TableView fx:id="leaveTable" prefHeight="300" VBox.vgrow="ALWAYS">
+            <columns>
+                <TableColumn text="ID" fx:id="colId" prefWidth="50" />
+                <TableColumn text="Çalışan" fx:id="colEmployee" prefWidth="150" />
+                <TableColumn text="İzin Türü" fx:id="colLeaveType" prefWidth="120" />
+                <TableColumn text="Başlangıç" fx:id="colStartDate" prefWidth="100" />
+                <TableColumn text="Bitiş" fx:id="colEndDate" prefWidth="100" />
+                <TableColumn text="Süre" fx:id="colDuration" prefWidth="80" />
+                <TableColumn text="Kalan İzin" fx:id="colRemainingLeave" prefWidth="100" />
+                <TableColumn text="Açıklama" fx:id="colDescription" prefWidth="150" />
+                <TableColumn text="İşlemler" fx:id="colActions" prefWidth="100" />
+            </columns>
+        </TableView>
+    </VBox>
+
+    <HBox alignment="CENTER_RIGHT" spacing="10">
+        <Button onAction="#onClose" style="-fx-background-color: #757575; -fx-text-fill: white;" text="Kapat" />
+    </HBox>
+</VBox> 

@@ -1,0 +1,76 @@
+[ {
+  "date" : [ 2025, 1, 1 ],
+  "description" : "Yılbaşı"
+}, {
+  "date" : [ 2025, 3, 1 ],
+  "description" : "Ramadan Start"
+}, {
+  "date" : [ 2025, 3, 29 ],
+  "description" : "Ramazan Bayramı Arifesi (yarım gün)"
+}, {
+  "date" : [ 2025, 3, 30 ],
+  "description" : "Ramazan Bayramı"
+}, {
+  "date" : [ 2025, 3, 31 ],
+  "description" : "Ramazan Bayramı"
+}, {
+  "date" : [ 2025, 4, 1 ],
+  "description" : "Ramazan Bayramı"
+}, {
+  "date" : [ 2025, 4, 2 ],
+  "description" : "Ramazan Bayramı"
+}, {
+  "date" : [ 2025, 4, 3 ],
+  "description" : "Ramazan Bayramı"
+}, {
+  "date" : [ 2025, 4, 4 ],
+  "description" : "Ramazan Bayramı"
+}, {
+  "date" : [ 2025, 4, 5 ],
+  "description" : "Ramazan Bayramı"
+}, {
+  "date" : [ 2025, 4, 6 ],
+  "description" : "Ramazan Bayramı"
+}, {
+  "date" : [ 2025, 4, 23 ],
+  "description" : "Ulusal Egemenlik ve Çocuk Bayramı"
+}, {
+  "date" : [ 2025, 5, 1 ],
+  "description" : "Emek ve Dayanışma Günü"
+}, {
+  "date" : [ 2025, 5, 19 ],
+  "description" : "Atatürk’ü Anma, Gençlik ve Spor Bayramı"
+}, {
+  "date" : [ 2025, 6, 5 ],
+  "description" : "Kurban Bayramı Arifesi (yarım gün)"
+}, {
+  "date" : [ 2025, 6, 6 ],
+  "description" : "Kurban Bayramı"
+}, {
+  "date" : [ 2025, 6, 7 ],
+  "description" : "Kurban Bayrami Day 2"
+}, {
+  "date" : [ 2025, 6, 8 ],
+  "description" : "Kurban Bayrami Day 3"
+}, {
+  "date" : [ 2025, 6, 9 ],
+  "description" : "Kurban Bayrami Day 4"
+}, {
+  "date" : [ 2025, 7, 15 ],
+  "description" : "Demokrasi ve Millî Birlik Günü"
+}, {
+  "date" : [ 2025, 8, 30 ],
+  "description" : "Zafer Bayramı"
+}, {
+  "date" : [ 2025, 10, 28 ],
+  "description" : "Cumhuriyet Bayramı Arifesi (yarım gün)"
+}, {
+  "date" : [ 2025, 10, 29 ],
+  "description" : "Cumhuriyet Bayramı"
+}, {
+  "date" : [ 2025, 11, 10 ],
+  "description" : "Atatürk'ü Anma Günü"
+}, {
+  "date" : [ 2025, 12, 31 ],
+  "description" : "Yılbaşı gecesi"
+} ]

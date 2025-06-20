@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox spacing="15" xmlns:fx="http://javafx.com/fxml" fx:controller="com.halilsahin.leaveflow.ui.QuickAddLeaveController">
+    <padding>
+        <Insets bottom="20" left="20" right="20" top="20" />
+    </padding>
+
+    <Label style="-fx-font-size: 18px; -fx-font-weight: bold;" text="🚀 Hızlı İzin Ekleme" />
+
+    <GridPane hgap="15" vgap="10">
+        <Label text="Çalışan:" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+        <ComboBox fx:id="employeeCombo" prefWidth="250" promptText="Çalışan Seç" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+
+        <Label text="İzin Türü:" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+        <ComboBox fx:id="leaveTypeCombo" prefWidth="250" promptText="İzin Türü Seç" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+
+        <Label text="Başlangıç:" GridPane.columnIndex="0" GridPane.rowIndex="2" />
+        <DatePicker fx:id="startDatePicker" prefWidth="250" promptText="Başlangıç tarihi" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+
+        <Label text="Bitiş:" GridPane.columnIndex="0" GridPane.rowIndex="3" />
+        <DatePicker fx:id="endDatePicker" prefWidth="250" promptText="Bitiş tarihi" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+        
+        <Label text="Süre:" GridPane.columnIndex="0" GridPane.rowIndex="4" />
+        <Label fx:id="calculatedDaysLabel" style="-fx-font-weight: bold; -fx-text-fill: #4CAF50; -fx-font-size: 16px;" text="0 gün" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+
+        <Label text="Açıklama:" GridPane.columnIndex="0" GridPane.rowIndex="5" />
+        <TextArea fx:id="descriptionArea" prefHeight="60" promptText="İzin açıklaması (isteğe bağlı)" GridPane.columnIndex="1" GridPane.rowIndex="5" />
+    </GridPane>
+
+    <HBox alignment="CENTER_RIGHT" spacing="10">
+        <Button onAction="#onSave" style="-fx-background-color: #4CAF50; -fx-text-fill: white; -fx-font-weight: bold;" text="✅ Kaydet" />
+        <Button onAction="#onCancel" style="-fx-background-color: #757575; -fx-text-fill: white;" text="❌ İptal" />
+    </HBox>
+</VBox> 

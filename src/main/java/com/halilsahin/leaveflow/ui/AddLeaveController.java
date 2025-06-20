@@ -1,0 +1,172 @@
+package com.halilsahin.leaveflow.ui;
+
+import com.halilsahin.leaveflow.model.Employee;
+import com.halilsahin.leaveflow.model.LeaveRecord;
+import com.halilsahin.leaveflow.model.OfficialHoliday;
+import com.halilsahin.leaveflow.repository.EmployeeRepository;
+import com.halilsahin.leaveflow.repository.LeaveRecordRepository;
+import com.halilsahin.leaveflow.repository.OfficialHolidayRepository;
+import com.halilsahin.leaveflow.service.LeaveCalculator;
+import javafx.fxml.FXML;
+import javafx.scene.control.*;
+import javafx.stage.Stage;
+import javafx.util.StringConverter;
+
+import java.time.LocalDate;
+import java.util.List;
+import java.util.stream.Collectors;
+
+public class AddLeaveController {
+    @FXML private ComboBox<Employee> employeeCombo;
+    @FXML private ComboBox<String> leaveTypeCombo;
+    @FXML private DatePicker startDatePicker;
+    @FXML private DatePicker endDatePicker;
+    @FXML private Label calculatedDaysLabel;
+    @FXML private TextArea descriptionArea;
+
+    private final EmployeeRepository employeeRepo = new EmployeeRepository();
+    private final LeaveRecordRepository leaveRepo = new LeaveRecordRepository();
+    private final OfficialHolidayRepository holidayRepo = new OfficialHolidayRepository();
+    private final LeaveCalculator calculator = new LeaveCalculator();
+    private List<LocalDate> officialHolidays;
+
+    @FXML
+    public void initialize() {
+        // Veritabanından verileri yükle
+        loadEmployees();
+        loadLeaveTypes();
+        loadHolidays();
+
+        // Tarih seçicileri yapılandır
+        setupDatePickers();
+
+        // Değişiklikleri dinle ve izin gününü yeniden hesapla
+        startDatePicker.valueProperty().addListener((obs, old, aNew) -> recalculateLeaveDays());
+        endDatePicker.valueProperty().addListener((obs, old, aNew) -> recalculateLeaveDays());
+    }
+
+    private void loadEmployees() {
+        employeeCombo.getItems().setAll(employeeRepo.getAll());
+        // ComboBox'ta çalışan isminin görünmesini sağla
+        employeeCombo.setConverter(new StringConverter<>() {
+            @Override
+            public String toString(Employee employee) {
+                return employee == null ? "" : employee.getName();
+            }
+
+            @Override
+            public Employee fromString(String string) {
+                return null;
+            }
+        });
+    }
+
+    private void loadLeaveTypes() {
+        leaveTypeCombo.getItems().addAll("Yıllık İzin", "Hastalık Raporu", "Mazeret İzni", "Diğer");
+    }
+
+    private void loadHolidays() {
+        this.officialHolidays = holidayRepo.getAll().stream()
+                .map(OfficialHoliday::getDate)
+                .collect(Collectors.toList());
+    }
+
+    private void setupDatePickers() {
+        // Geçmiş tarihleri devre dışı bırak
+        LocalDate today = LocalDate.now();
+        startDatePicker.setDayCellFactory(picker -> new DateCell() {
+            @Override
+            public void updateItem(LocalDate date, boolean empty) {
+                super.updateItem(date, empty);
+                setDisable(empty || date.isBefore(today));
+            }
+        });
+
+        endDatePicker.setDayCellFactory(picker -> new DateCell() {
+            @Override
+            public void updateItem(LocalDate date, boolean empty) {
+                super.updateItem(date, empty);
+                LocalDate start = startDatePicker.getValue();
+                setDisable(empty || (start != null && date.isBefore(start)));
+            }
+        });
+    }
+
+    private void recalculateLeaveDays() {
+        LocalDate start = startDatePicker.getValue();
+        LocalDate end = endDatePicker.getValue();
+
+        if (start != null && end != null && !end.isBefore(start)) {
+            int days = calculator.calculateLeaveDays(start, end, officialHolidays);
+            calculatedDaysLabel.setText(days + " gün");
+        } else {
+            calculatedDaysLabel.setText("0 gün");
+        }
+    }
+
+    @FXML
+    private void onSave() {
+        // Gerekli alanların kontrolü
+        Employee selectedEmployee = employeeCombo.getValue();
+        String leaveType = leaveTypeCombo.getValue();
+        LocalDate startDate = startDatePicker.getValue();
+        LocalDate endDate = endDatePicker.getValue();
+
+        if (selectedEmployee == null || leaveType == null || startDate == null || endDate == null) {
+            showAlert(Alert.AlertType.WARNING, "Eksik Bilgi", "Lütfen tüm zorunlu alanları doldurun.");
+            return;
+        }
+
+        // İzin süresini hesapla
+        int leaveDays = calculator.calculateLeaveDays(startDate, endDate, officialHolidays);
+        if (leaveDays <= 0) {
+            showAlert(Alert.AlertType.WARNING, "Geçersiz Süre", "İzin süresi 0 günden fazla olmalıdır.");
+            return;
+        }
+
+        // Yıllık izin kontrolü
+        if (leaveType.equals("Yıllık İzin")) {
+            int remainingLeave = getRemainingAnnualLeave(selectedEmployee);
+            if (leaveDays > remainingLeave) {
+                showAlert(Alert.AlertType.ERROR, "Yetersiz Bakiye", "Çalışanın kalan yıllık izin hakkı (" + remainingLeave + " gün) bu izin için yetersiz.");
+                return;
+            }
+        }
+        
+        // Veritabanına kaydet
+        String dayDetails = calculator.calculateLeaveDaysWithDetails(startDate, endDate, officialHolidays);
+        
+        LeaveRecord newRecord = new LeaveRecord(0, selectedEmployee.getId(), leaveType, startDate, endDate, 
+            descriptionArea.getText(), leaveDays, dayDetails);
+        leaveRepo.add(newRecord);
+        
+        showAlert(Alert.AlertType.INFORMATION, "Başarılı", "İzin kaydı başarıyla oluşturuldu.");
+        closeWindow();
+    }
+
+    private int getRemainingAnnualLeave(Employee employee) {
+        int totalUsed = leaveRepo.getByEmployeeId(employee.getId()).stream()
+                .filter(record -> "Yıllık İzin".equals(record.getLeaveType()))
+                .mapToInt(record -> calculator.calculateLeaveDays(record.getStartDate(), record.getEndDate(), officialHolidays))
+                .sum();
+        return employee.getAnnualLeaveDays() - totalUsed;
+    }
+
+    @FXML
+    private void onCancel() {
+        closeWindow();
+    }
+
+    private void showAlert(Alert.AlertType alertType, String title, String message) {
+        Alert alert = new Alert(alertType);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
+    }
+
+    private void closeWindow() {
+        Stage stage = (Stage) employeeCombo.getScene().getWindow();
+        stage.close();
+    }
+} 
