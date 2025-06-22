@@ -223,6 +223,17 @@ public class PdfExportService {
         document.add(new Paragraph("Ortalama İzin Süresi: " + String.format("%.1f gün", avgDays)).setFont(numericFont)); // Sayı için sayısal font
         document.add(new Paragraph("Toplam Kayıt Sayısı: " + records.size()).setFont(numericFont)); // Sayı için sayısal font
         
+        // Footer ekle
+        for (int i = 1; i <= pdf.getNumberOfPages(); i++) {
+            com.itextpdf.kernel.pdf.PdfPage page = pdf.getPage(i);
+            com.itextpdf.kernel.pdf.canvas.PdfCanvas canvas = new com.itextpdf.kernel.pdf.canvas.PdfCanvas(page);
+            canvas.beginText();
+            canvas.setFontAndSize(font, 8);
+            canvas.moveText(40, 20);
+            canvas.showText("© 2025 Halil Şahin • halilsahin.dev@gmail.com");
+            canvas.endText();
+            canvas.release();
+        }
         document.close();
     }
     
@@ -326,6 +337,17 @@ public class PdfExportService {
             document.add(detailsTable);
         }
         
+        // Footer ekle
+        for (int i = 1; i <= pdf.getNumberOfPages(); i++) {
+            com.itextpdf.kernel.pdf.PdfPage page = pdf.getPage(i);
+            com.itextpdf.kernel.pdf.canvas.PdfCanvas canvas = new com.itextpdf.kernel.pdf.canvas.PdfCanvas(page);
+            canvas.beginText();
+            canvas.setFontAndSize(font, 8);
+            canvas.moveText(40, 20);
+            canvas.showText("© 2025 Halil Şahin • halilsahin.dev@gmail.com");
+            canvas.endText();
+            canvas.release();
+        }
         document.close();
     }
 } 

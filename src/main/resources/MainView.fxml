@@ -24,27 +24,24 @@
                 <padding>
                     <Insets bottom="15" left="15" right="15" top="15" />
                 </padding>
-                
-                <!-- Çalışan Listesi -->
-                <VBox spacing="10">
-                    <HBox alignment="CENTER_LEFT" spacing="10">
-                        <Label style="-fx-font-size: 18px; -fx-font-weight: bold;" text="Çalışan Listesi" />
-                        <Region HBox.hgrow="ALWAYS" />
-                        <Button onAction="#onAddEmployee" style="-fx-background-color: #2196F3; -fx-text-fill: white;" text="+ Yeni Çalışan" />
-                    </HBox>
-                    
-                    <TableView fx:id="employeeTable" VBox.vgrow="ALWAYS" style="-fx-background-color: white;">
-                        <columns>
-                            <TableColumn text="ID" fx:id="colId" prefWidth="50" />
-                            <TableColumn text="İsim" fx:id="colName" prefWidth="200" />
-                            <TableColumn text="İşe Giriş" fx:id="hireDateColumn" prefWidth="100" />
-                            <TableColumn text="Hizmet Süresi" fx:id="colServiceYears" prefWidth="100" />
-                            <TableColumn text="Yıllık İzin" fx:id="totalLeaveColumn" prefWidth="100" />
-                            <TableColumn text="Kalan İzin" fx:id="remainingLeaveColumn" prefWidth="100" />
-                            <TableColumn text="İşlemler" fx:id="actionsColumn" prefWidth="120" />
-                        </columns>
-                    </TableView>
-                </VBox>
+                <!-- Modern başlık ve buton kartı -->
+                <HBox alignment="CENTER_LEFT" spacing="10" style="-fx-background-color: #f5f7fa; -fx-padding: 20 24 20 24; -fx-background-radius: 16; -fx-effect: dropshadow(gaussian, #B0BEC5, 8, 0.12, 0, 2);" HBox.hgrow="ALWAYS" VBox.vgrow="NEVER">
+                    <Label style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #1976D2;" text="👥 Çalışan Listesi" />
+                    <Region HBox.hgrow="ALWAYS" />
+                    <Button onAction="#onAddEmployee" style="-fx-background-color: #1976D2; -fx-text-fill: white; -fx-font-size: 16px; -fx-font-weight: bold; -fx-background-radius: 22; -fx-padding: 8 28; -fx-cursor: hand;" text="+ Yeni Çalışan" />
+                </HBox>
+                <!-- Modern tablo -->
+                <TableView fx:id="employeeTable" VBox.vgrow="ALWAYS" style="-fx-background-color: white; -fx-border-radius: 12; -fx-background-radius: 12; -fx-effect: dropshadow(gaussian, #CFD8DC, 6, 0.10, 0, 2);">
+                    <columns>
+                        <TableColumn text="ID" fx:id="colId" prefWidth="50" style="-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #607D8B;" />
+                        <TableColumn text="İsim" fx:id="colName" prefWidth="200" style="-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #263238;" />
+                        <TableColumn text="İşe Giriş" fx:id="hireDateColumn" prefWidth="100" style="-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #263238;" />
+                        <TableColumn text="Hizmet Süresi" fx:id="colServiceYears" prefWidth="100" style="-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #263238;" />
+                        <TableColumn text="Yıllık İzin" fx:id="totalLeaveColumn" prefWidth="100" style="-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #263238;" />
+                        <TableColumn text="Kalan İzin" fx:id="remainingLeaveColumn" prefWidth="100" style="-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #263238;" />
+                        <TableColumn text="🛠️ İşlemler" fx:id="actionsColumn" prefWidth="120" style="-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #263238;" />
+                    </columns>
+                </TableView>
             </VBox>
         </Tab>
         
@@ -178,7 +175,14 @@
                         <Button onAction="#onUpdateAnnualLeaves" style="-fx-background-color: #1976D2; -fx-text-fill: white;" text="Yıllık İzin Haklarını Güncelle" />
                     </HBox>
                 </VBox>
+
+                <!-- Hakkında Butonu -->
+                <Button onAction="#onShowAbout" style="-fx-background-color: #ECEFF1; -fx-text-fill: #1976D2; -fx-font-size: 14px; -fx-font-weight: bold; -fx-background-radius: 16; -fx-padding: 6 18; -fx-cursor: hand;" text="ℹ️ Hakkında" HBox.hgrow="ALWAYS" />
             </VBox>
         </Tab>
     </TabPane>
+
+    <HBox alignment="CENTER" style="-fx-padding: 8 0 8 0;">
+        <Label text="© 2025 Halil Şahin • halilsahin.dev@gmail.com" style="-fx-font-size: 12px; -fx-text-fill: #90A4AE;" />
+    </HBox>
 </VBox> 

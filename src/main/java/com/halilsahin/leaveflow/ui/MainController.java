@@ -119,6 +119,7 @@ public class MainController {
     }
     
     private void setupEmployeeTable() {
+        employeeTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         colId.setCellValueFactory(new PropertyValueFactory<>("id"));
         colName.setCellValueFactory(new PropertyValueFactory<>("name"));
         
@@ -147,18 +148,20 @@ public class MainController {
 
         // İşlem butonları
         actionsColumn.setCellFactory(column -> new TableCell<>() {
-            private final Button editButton = new Button("✏️");
+            private final Button editButton = new Button("📝");
             private final Button deleteButton = new Button("🗑️");
 
             {
-                editButton.setStyle("-fx-background-color: #2196F3; -fx-text-fill: white; -fx-font-size: 12px; -fx-cursor: hand;");
+                editButton.setStyle("-fx-background-color: #2196F3; -fx-text-fill: white; -fx-font-size: 14px; -fx-cursor: hand; -fx-background-radius: 16; -fx-padding: 4 10;");
                 editButton.setTooltip(new Tooltip("Çalışanı Düzenle"));
                 editButton.setOnAction(event -> {
                     Employee employee = getTableView().getItems().get(getIndex());
                     handleEditEmployee(employee);
                 });
-                
-                deleteButton.setStyle("-fx-background-color: #f44336; -fx-text-fill: white; -fx-font-size: 12px; -fx-cursor: hand;");
+                editButton.setOnMouseEntered(e -> editButton.setStyle("-fx-background-color: #1976D2; -fx-text-fill: white; -fx-font-size: 14px; -fx-cursor: hand; -fx-background-radius: 16; -fx-padding: 4 10;"));
+                editButton.setOnMouseExited(e -> editButton.setStyle("-fx-background-color: #2196F3; -fx-text-fill: white; -fx-font-size: 14px; -fx-cursor: hand; -fx-background-radius: 16; -fx-padding: 4 10;"));
+
+                deleteButton.setStyle("-fx-background-color: #f44336; -fx-text-fill: white; -fx-font-size: 14px; -fx-cursor: hand; -fx-background-radius: 16; -fx-padding: 4 10;");
                 deleteButton.setTooltip(new Tooltip("Çalışanı Sil"));
                 deleteButton.setOnAction(event -> {
                     Employee employee = getTableView().getItems().get(getIndex());
@@ -184,6 +187,7 @@ public class MainController {
     }
     
     private void setupLeaveTable() {
+        leaveTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         colLeaveId.setCellValueFactory(cellData -> {
             int index = leaveTable.getItems().indexOf(cellData.getValue()) + 1;
             return new SimpleStringProperty(String.valueOf(index));
@@ -489,6 +493,15 @@ public class MainController {
         }
         loadData();
         showAlert("Tüm çalışanların yıllık izin hakları hizmet süresine göre güncellendi!", Alert.AlertType.INFORMATION);
+    }
+    
+    @FXML
+    private void onShowAbout() {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Hakkında");
+        alert.setHeaderText("İzin Yönetim Sistemi");
+        alert.setContentText("Geliştirici: Halil Şahin\nE-posta: halilsahin.dev@gmail.com\n© 2025");
+        alert.showAndWait();
     }
     
     // Helper Methods
