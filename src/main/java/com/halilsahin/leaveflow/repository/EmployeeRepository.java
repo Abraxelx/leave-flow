@@ -41,15 +41,14 @@ public class EmployeeRepository {
         }
     }
 
-    public void update(Employee emp) {
-        String sql = "UPDATE employee SET name = ?, hire_date = ?, annual_leave_days = ? WHERE id = ?";
-        try (Connection conn = DatabaseHelper.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setString(1, emp.getName());
-            pstmt.setString(2, emp.getHireDate() != null ? emp.getHireDate().toString() : null);
-            pstmt.setInt(3, emp.getAnnualLeaveDays());
-            pstmt.setInt(4, emp.getId());
-            pstmt.executeUpdate();
+    public void update(Employee employee) {
+        try (var conn = DatabaseHelper.getConnection();
+             var stmt = conn.prepareStatement("UPDATE employee SET name = ?, hire_date = ?, annual_leave_days = ? WHERE id = ?")) {
+            stmt.setString(1, employee.getName());
+            stmt.setString(2, employee.getHireDate().toString());
+            stmt.setInt(3, employee.getAnnualLeaveDays());
+            stmt.setInt(4, employee.getId());
+            stmt.executeUpdate();
         } catch (Exception e) {
             e.printStackTrace();
         }

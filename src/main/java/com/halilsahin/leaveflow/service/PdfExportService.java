@@ -157,7 +157,7 @@ public class PdfExportService {
         
         // Tarih
         Paragraph date = new Paragraph("Rapor Tarihi: " + java.time.LocalDate.now().format(DateTimeFormatter.ofPattern("dd.MM.yyyy")))
-                .setFont(font)
+                .setFont(numericFont)
                 .setFontSize(12)
                 .setTextAlignment(TextAlignment.RIGHT);
         document.add(date);
@@ -178,29 +178,31 @@ public class PdfExportService {
         table.addHeaderCell(new Cell().add(new Paragraph("Kalan").setFont(font)).setBold());
         table.addHeaderCell(new Cell().add(new Paragraph("Detay").setFont(font)).setBold());
         
-        // Tablo verileri
-        for (LeaveRecord record : records) {
+        // Tablo verileri (en yeni izin en üstte olacak şekilde sırala)
+        List<LeaveRecord> sortedRecords = records.stream()
+            .sorted((a, b) -> b.getStartDate().compareTo(a.getStartDate()))
+            .collect(Collectors.toList());
+        Map<Integer, Integer> employeeUsedDays = new java.util.HashMap<>();
+        for (LeaveRecord record : sortedRecords) {
             Employee employee = employeeMap.get(record.getEmployeeId());
             String employeeName = employee != null ? employee.getName() : "Bilinmeyen";
-            
-            // Kalan izin hesapla
-            int remainingLeave = 0;
-            if (employee != null) {
-                remainingLeave = calculateRemainingLeave(employee, allRecords, holidays);
-            }
-            
-            table.addCell(new Cell().add(new Paragraph(String.valueOf(record.getId())).setFont(numericFont))); // ID için sayısal font
+            int totalLeave = employee != null ? employee.getAnnualLeaveDays() : 0;
+            int used = employeeUsedDays.getOrDefault(record.getEmployeeId(), 0);
+            int thisLeave = record.getCalculatedDays();
+            int remainingLeave = totalLeave - used;
+            table.addCell(new Cell().add(new Paragraph(String.valueOf(record.getId())).setFont(numericFont)));
             table.addCell(new Cell().add(new Paragraph(employeeName).setFont(font)));
             table.addCell(new Cell().add(new Paragraph(record.getLeaveType()).setFont(font)));
-            table.addCell(new Cell().add(new Paragraph(record.getStartDate().format(DateTimeFormatter.ofPattern("dd.MM.yyyy"))).setFont(numericFont))); // Tarih için sayısal font
-            table.addCell(new Cell().add(new Paragraph(record.getEndDate().format(DateTimeFormatter.ofPattern("dd.MM.yyyy"))).setFont(numericFont))); // Tarih için sayısal font
-            table.addCell(new Cell().add(new Paragraph(record.getCalculatedDays() + " gün").setFont(numericFont))); // Sayı için sayısal font
-            table.addCell(new Cell().add(new Paragraph(remainingLeave + " gün").setFont(numericFont))); // Sayı için sayısal font
-            
+            table.addCell(new Cell().add(new Paragraph(record.getStartDate().format(DateTimeFormatter.ofPattern("dd.MM.yyyy"))).setFont(numericFont)));
+            table.addCell(new Cell().add(new Paragraph(record.getEndDate().format(DateTimeFormatter.ofPattern("dd.MM.yyyy"))).setFont(numericFont)));
+            table.addCell(new Cell().add(new Paragraph(record.getCalculatedDays() + " gün").setFont(numericFont)));
+            table.addCell(new Cell().add(new Paragraph(remainingLeave + " gün").setFont(numericFont)));
             // Detay butonu yerine "Görüntüle" yazısı
             Cell detailCell = new Cell().add(new Paragraph("Görüntüle").setFont(font));
             detailCell.setBackgroundColor(com.itextpdf.kernel.colors.ColorConstants.LIGHT_GRAY);
             table.addCell(detailCell);
+            // Sonraki kayıtlar için kullanılan günleri güncelle
+            employeeUsedDays.put(record.getEmployeeId(), used + thisLeave);
         }
         
         document.add(table);

@@ -178,6 +178,7 @@
                         <Button onAction="#onBackupDatabase" style="-fx-background-color: #4CAF50; -fx-text-fill: white;" text="Yedekle" />
                         <Button onAction="#onRestoreDatabase" style="-fx-background-color: #FF9800; -fx-text-fill: white;" text="Geri Yükle" />
                         <Button onAction="#onResetDatabase" style="-fx-background-color: #f44336; -fx-text-fill: white;" text="Sıfırla" />
+                        <Button onAction="#onUpdateAnnualLeaves" style="-fx-background-color: #1976D2; -fx-text-fill: white;" text="Yıllık İzin Haklarını Güncelle" />
                     </HBox>
                 </VBox>
             </VBox>

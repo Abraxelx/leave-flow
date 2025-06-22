@@ -53,7 +53,7 @@ public class MainController {
     @FXML private DatePicker startDateFilter;
     @FXML private DatePicker endDateFilter;
     @FXML private TableView<LeaveRecord> leaveTable;
-    @FXML private TableColumn<LeaveRecord, Integer> colLeaveId;
+    @FXML private TableColumn<LeaveRecord, String> colLeaveId;
     @FXML private TableColumn<LeaveRecord, String> colLeaveEmployee;
     @FXML private TableColumn<LeaveRecord, String> colLeaveType;
     @FXML private TableColumn<LeaveRecord, String> colLeaveStart;
@@ -182,7 +182,10 @@ public class MainController {
     }
     
     private void setupLeaveTable() {
-        colLeaveId.setCellValueFactory(new PropertyValueFactory<>("id"));
+        colLeaveId.setCellValueFactory(cellData -> {
+            int index = leaveTable.getItems().indexOf(cellData.getValue()) + 1;
+            return new SimpleStringProperty(String.valueOf(index));
+        });
         colLeaveEmployee.setCellValueFactory(cellData -> {
             Employee employee = employeeMap.get(cellData.getValue().getEmployeeId());
             return new SimpleStringProperty(employee != null ? employee.getName() : "Bilinmeyen");
@@ -197,14 +200,29 @@ public class MainController {
             int days = leaveCalculator.calculateLeaveDays(record.getStartDate(), record.getEndDate(), officialHolidays);
             return new SimpleStringProperty(days + " gün");
         });
-        colLeaveRemaining.setCellValueFactory(cellData -> {
-            LeaveRecord record = cellData.getValue();
-            Employee employee = employeeMap.get(record.getEmployeeId());
-            if (employee != null) {
-                int remainingLeave = calculateRemainingLeave(employee);
-                return new SimpleStringProperty(remainingLeave + " gün");
-            } else {
-                return new SimpleStringProperty("Bilinmeyen");
+        
+        // Sıralı izin listesi (en yeni en üstte)
+        List<LeaveRecord> sortedLeaves = filteredLeaveList.stream()
+            .sorted((a, b) -> {
+                int cmp = Integer.compare(a.getEmployeeId(), b.getEmployeeId());
+                if (cmp == 0) {
+                    return b.getStartDate().compareTo(a.getStartDate());
+                }
+                return cmp;
+            })
+            .collect(Collectors.toList());
+        leaveTable.getItems().setAll(sortedLeaves);
+        colLeaveRemaining.setCellFactory(column -> new TableCell<>() {
+            @Override
+            protected void updateItem(String item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || getTableRow() == null || getTableRow().getItem() == null) {
+                    setText(null);
+                } else {
+                    LeaveRecord record = getTableRow().getItem();
+                    Integer remaining = record.getRemainingLeave();
+                    setText((remaining != null ? remaining : 0) + " gün");
+                }
             }
         });
 
@@ -387,17 +405,74 @@ public class MainController {
     
     @FXML
     private void onBackupDatabase() {
-        backupDatabase();
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Veritabanı Yedeğini Kaydet");
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("SQLite DB", "*.db"));
+        fileChooser.setInitialFileName("leaveflow_backup.db");
+        File dest = fileChooser.showSaveDialog(null);
+        if (dest != null) {
+            try {
+                java.nio.file.Files.copy(
+                    new File("leaveflow.db").toPath(),
+                    dest.toPath(),
+                    java.nio.file.StandardCopyOption.REPLACE_EXISTING
+                );
+                showAlert("Veritabanı başarıyla yedeklendi!", Alert.AlertType.INFORMATION);
+            } catch (Exception e) {
+                showAlert("Yedekleme sırasında hata oluştu: " + e.getMessage(), Alert.AlertType.ERROR);
+            }
+        }
     }
     
     @FXML
     private void onRestoreDatabase() {
-        restoreDatabase();
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Yedekten Veritabanı Geri Yükle");
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("SQLite DB", "*.db"));
+        File src = fileChooser.showOpenDialog(null);
+        if (src != null) {
+            try {
+                java.nio.file.Files.copy(
+                    src.toPath(),
+                    new File("leaveflow.db").toPath(),
+                    java.nio.file.StandardCopyOption.REPLACE_EXISTING
+                );
+                loadData();
+                showAlert("Veritabanı yedekten başarıyla geri yüklendi!", Alert.AlertType.INFORMATION);
+            } catch (Exception e) {
+                showAlert("Geri yükleme sırasında hata oluştu: " + e.getMessage(), Alert.AlertType.ERROR);
+            }
+        }
     }
     
     @FXML
     private void onResetDatabase() {
-        resetDatabase();
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle("Veritabanı Sıfırla");
+        alert.setHeaderText("Tüm verileri silmek istediğinizden emin misiniz?");
+        alert.setContentText("Bu işlem geri alınamaz!");
+        Optional<ButtonType> result = alert.showAndWait();
+        if (result.isPresent() && result.get() == ButtonType.OK) {
+            try {
+                java.nio.file.Files.deleteIfExists(new File("leaveflow.db").toPath());
+                // Boş veritabanı otomatik oluşacak (uygulama açıldığında)
+                loadData();
+                showAlert("Veritabanı sıfırlandı. Uygulamayı yeniden başlatmanız önerilir.", Alert.AlertType.INFORMATION);
+            } catch (Exception e) {
+                showAlert("Sıfırlama sırasında hata oluştu: " + e.getMessage(), Alert.AlertType.ERROR);
+            }
+        }
+    }
+    
+    @FXML
+    private void onUpdateAnnualLeaves() {
+        for (Employee employee : employeeList) {
+            int newAnnualLeave = employee.calculateMinimumAnnualLeave();
+            employee.setAnnualLeaveDays(newAnnualLeave);
+            employeeRepository.update(employee);
+        }
+        loadData();
+        showAlert("Tüm çalışanların yıllık izin hakları hizmet süresine göre güncellendi!", Alert.AlertType.INFORMATION);
     }
     
     // Helper Methods
@@ -440,7 +515,22 @@ public class MainController {
     }
     
     private void handleEditEmployee(Employee employee) {
-        showAlert("Çalışan düzenleme özelliği yakında eklenecek.", Alert.AlertType.INFORMATION);
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/EditEmployeeView.fxml"));
+            Scene scene = new Scene(loader.load());
+            EditEmployeeController controller = loader.getController();
+            controller.setEmployee(employee);
+            Stage stage = new Stage();
+            stage.setTitle("Çalışan Bilgilerini Düzenle");
+            stage.initModality(Modality.APPLICATION_MODAL);
+            stage.setScene(scene);
+            stage.setResizable(false);
+            stage.setOnHidden(e -> loadData());
+            stage.showAndWait();
+        } catch (IOException e) {
+            e.printStackTrace();
+            showAlert("Hata: " + e.getMessage(), Alert.AlertType.ERROR);
+        }
     }
     
     private void handleDeleteEmployee(Employee employee) {
@@ -546,26 +636,6 @@ public class MainController {
             showAlert("Tatil günleri başarıyla güncellendi.", Alert.AlertType.INFORMATION);
         } catch (Exception e) {
             showAlert("Tatiller alınamadı: " + e.getMessage(), Alert.AlertType.ERROR);
-        }
-    }
-    
-    private void backupDatabase() {
-        showAlert("Veritabanı yedekleme özelliği yakında eklenecek.", Alert.AlertType.INFORMATION);
-    }
-    
-    private void restoreDatabase() {
-        showAlert("Veritabanı geri yükleme özelliği yakında eklenecek.", Alert.AlertType.INFORMATION);
-    }
-    
-    private void resetDatabase() {
-        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-        alert.setTitle("Veritabanı Sıfırla");
-        alert.setHeaderText("Tüm verileri silmek istediğinizden emin misiniz?");
-        alert.setContentText("Bu işlem geri alınamaz!");
-
-        Optional<ButtonType> result = alert.showAndWait();
-        if (result.isPresent() && result.get() == ButtonType.OK) {
-            showAlert("Veritabanı sıfırlama özelliği yakında eklenecek.", Alert.AlertType.INFORMATION);
         }
     }
     

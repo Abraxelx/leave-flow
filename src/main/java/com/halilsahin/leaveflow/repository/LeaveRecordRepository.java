@@ -23,7 +23,8 @@ public class LeaveRecordRepository {
                         LocalDate.parse(rs.getString("end_date")),
                         rs.getString("description"),
                         rs.getInt("calculated_days"),
-                        rs.getString("day_details")
+                        rs.getString("day_details"),
+                        rs.getObject("remainingLeave") != null ? rs.getInt("remainingLeave") : null
                 ));
             }
         } catch (Exception e) {
@@ -48,7 +49,8 @@ public class LeaveRecordRepository {
                         LocalDate.parse(rs.getString("end_date")),
                         rs.getString("description"),
                         rs.getInt("calculated_days"),
-                        rs.getString("day_details")
+                        rs.getString("day_details"),
+                        rs.getObject("remainingLeave") != null ? rs.getInt("remainingLeave") : null
                 ));
             }
         } catch (Exception e) {
@@ -58,7 +60,7 @@ public class LeaveRecordRepository {
     }
 
     public void add(LeaveRecord record) {
-        String sql = "INSERT INTO leave_record (employee_id, leave_type, start_date, end_date, description, calculated_days, day_details) VALUES (?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO leave_record (employee_id, leave_type, start_date, end_date, description, calculated_days, day_details, remainingLeave) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
         try (Connection conn = DatabaseHelper.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, record.getEmployeeId());
@@ -68,6 +70,11 @@ public class LeaveRecordRepository {
             pstmt.setString(5, record.getDescription());
             pstmt.setInt(6, record.getCalculatedDays());
             pstmt.setString(7, record.getDayDetails());
+            if (record.getRemainingLeave() != null) {
+                pstmt.setInt(8, record.getRemainingLeave());
+            } else {
+                pstmt.setNull(8, java.sql.Types.INTEGER);
+            }
             pstmt.executeUpdate();
         } catch (Exception e) {
             e.printStackTrace();
@@ -79,6 +86,22 @@ public class LeaveRecordRepository {
         try (Connection conn = DatabaseHelper.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, id);
+            pstmt.executeUpdate();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void updateRemainingLeave(int id, Integer remainingLeave) {
+        String sql = "UPDATE leave_record SET remainingLeave = ? WHERE id = ?";
+        try (Connection conn = DatabaseHelper.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            if (remainingLeave != null) {
+                pstmt.setInt(1, remainingLeave);
+            } else {
+                pstmt.setNull(1, java.sql.Types.INTEGER);
+            }
+            pstmt.setInt(2, id);
             pstmt.executeUpdate();
         } catch (Exception e) {
             e.printStackTrace();

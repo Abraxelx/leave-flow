@@ -12,6 +12,7 @@ public class LeaveRecord {
     private String description;
     private int calculatedDays;
     private String dayDetails; // JSON formatında gün detayları
+    private Integer remainingLeave;
 
     public LeaveRecord(int id, int employeeId, String leaveType, LocalDate startDate, LocalDate endDate, String description) {
         this.id = id;
@@ -33,6 +34,18 @@ public class LeaveRecord {
         this.dayDetails = dayDetails;
     }
 
+    public LeaveRecord(int id, int employeeId, String leaveType, LocalDate startDate, LocalDate endDate, String description, int calculatedDays, String dayDetails, Integer remainingLeave) {
+        this.id = id;
+        this.employeeId = employeeId;
+        this.leaveType = leaveType;
+        this.startDate = startDate;
+        this.endDate = endDate;
+        this.description = description;
+        this.calculatedDays = calculatedDays;
+        this.dayDetails = dayDetails;
+        this.remainingLeave = remainingLeave;
+    }
+
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }
     public int getEmployeeId() { return employeeId; }
@@ -49,4 +62,6 @@ public class LeaveRecord {
     public void setCalculatedDays(int calculatedDays) { this.calculatedDays = calculatedDays; }
     public String getDayDetails() { return dayDetails; }
     public void setDayDetails(String dayDetails) { this.dayDetails = dayDetails; }
+    public Integer getRemainingLeave() { return remainingLeave; }
+    public void setRemainingLeave(Integer remainingLeave) { this.remainingLeave = remainingLeave; }
 } 
