@@ -69,6 +69,10 @@ public class MainController {
     @FXML private TextField holidayYearField;
     @FXML private CheckBox includeDetailsCheckBox;
     @FXML private CheckBox includeStatsCheckBox;
+    @FXML private TableView<OfficialHoliday> holidayTable;
+    @FXML private TableColumn<OfficialHoliday, String> colHolidayDate;
+    @FXML private TableColumn<OfficialHoliday, String> colHolidayDay;
+    @FXML private TableColumn<OfficialHoliday, String> colHolidayDesc;
     
     // Repositories
     private final EmployeeRepository employeeRepository = new EmployeeRepository();
@@ -94,12 +98,16 @@ public class MainController {
         setupSettings();
         setupDatePickerLocale(startDateFilter);
         setupDatePickerLocale(endDateFilter);
+        loadHolidaysTable();
         
         // Tab değişikliklerini dinle
         mainTabPane.getSelectionModel().selectedItemProperty().addListener((obs, oldTab, newTab) -> {
             if (newTab.getText().contains("İzinler")) {
                 loadLeaves();
                 updateStatistics();
+            }
+            if (newTab.getText().contains("Ayarlar")) {
+                loadHolidaysTable();
             }
         });
     }
@@ -421,6 +429,7 @@ public class MainController {
     @FXML
     private void onUpdateHolidays() {
         updateHolidays();
+        loadHolidaysTable();
     }
     
     @FXML
@@ -734,6 +743,23 @@ public class MainController {
             showAlert("Tatil günleri başarıyla güncellendi.", Alert.AlertType.INFORMATION);
         } catch (Exception e) {
             showAlert("Tatiller alınamadı: " + e.getMessage(), Alert.AlertType.ERROR);
+        }
+    }
+    
+    private void loadHolidaysTable() {
+        try {
+            int year = Integer.parseInt(holidayYearField.getText().trim());
+            List<OfficialHoliday> holidays = holidayRepository.getAll();
+            java.time.format.DateTimeFormatter formatter = java.time.format.DateTimeFormatter.ofPattern("dd.MM.yyyy");
+            java.util.Locale tr = new java.util.Locale("tr", "TR");
+            colHolidayDate.setCellValueFactory(cellData -> new javafx.beans.property.SimpleStringProperty(cellData.getValue().getDate().format(formatter)));
+            colHolidayDay.setCellValueFactory(cellData -> new javafx.beans.property.SimpleStringProperty(cellData.getValue().getDate().getDayOfWeek().getDisplayName(java.time.format.TextStyle.FULL, tr)));
+            colHolidayDesc.setCellValueFactory(cellData -> new javafx.beans.property.SimpleStringProperty(cellData.getValue().getDescription()));
+            // Sadece seçili yılın tatilleri
+            List<OfficialHoliday> filtered = holidays.stream().filter(h -> h.getDate().getYear() == year).toList();
+            holidayTable.getItems().setAll(filtered);
+        } catch (Exception e) {
+            holidayTable.getItems().clear();
         }
     }
     

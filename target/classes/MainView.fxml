@@ -154,6 +154,14 @@
                         <Button onAction="#onUpdateHolidays" style="-fx-background-color: #2196F3; -fx-text-fill: white;" text="Güncelle" />
                         <Label text="(Google Calendar API'den otomatik çeker)" style="-fx-font-size: 12px; -fx-text-fill: #666;" />
                     </HBox>
+                    <!-- Tatil Listesi Tablosu -->
+                    <TableView fx:id="holidayTable" style="-fx-background-color: white; -fx-border-radius: 8; -fx-background-radius: 8;" prefHeight="180">
+                        <columns>
+                            <TableColumn fx:id="colHolidayDate" text="Tarih" prefWidth="100" style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #263238;" />
+                            <TableColumn fx:id="colHolidayDay" text="Hafta Günü" prefWidth="120" style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #263238;" />
+                            <TableColumn fx:id="colHolidayDesc" text="Açıklama" prefWidth="220" style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #263238;" />
+                        </columns>
+                    </TableView>
                 </VBox>
                 
                 <!-- PDF Ayarları -->
