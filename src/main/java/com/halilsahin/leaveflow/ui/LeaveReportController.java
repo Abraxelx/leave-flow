@@ -68,6 +68,8 @@ public class LeaveReportController {
         setupTable();
         loadAllLeaves();
         updateStatistics();
+        setupDatePickerLocale(startDateFilter);
+        setupDatePickerLocale(endDateFilter);
     }
 
     private void loadData() {
@@ -322,6 +324,78 @@ public class LeaveReportController {
     }
 
     @FXML
+    private void onExportEmployeeReport() {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Çalışan Bazlı İzin Raporu Export");
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("PDF Files", "*.pdf"));
+        fileChooser.setInitialFileName("calisan_izin_raporu.pdf");
+        File file = fileChooser.showSaveDialog(null);
+        if (file != null) {
+            try {
+                // Her çalışan için izinleri grupla
+                List<LeaveRecord> allRecords = leaveRecordRepository.getAll();
+                List<Employee> allEmployees = employeeRepository.getAll();
+                Map<Integer, Employee> employeeMap = allEmployees.stream().collect(Collectors.toMap(Employee::getId, e -> e));
+                pdfExportService.exportLeaveReport(allRecords, employeeMap, file.getAbsolutePath());
+                showAlert("Çalışan bazlı izin raporu başarıyla dışa aktarıldı.", Alert.AlertType.INFORMATION);
+            } catch (Exception e) {
+                showAlert("PDF oluşturulurken hata oluştu: " + e.getMessage(), Alert.AlertType.ERROR);
+                e.printStackTrace();
+            }
+        }
+    }
+
+    @FXML
+    private void onExportMonthlyReport() {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Aylık İzin Raporu Export");
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("PDF Files", "*.pdf"));
+        fileChooser.setInitialFileName("aylik_izin_raporu.pdf");
+        File file = fileChooser.showSaveDialog(null);
+        if (file != null) {
+            try {
+                // Sadece bu ayın izinlerini filtrele
+                List<LeaveRecord> allRecords = leaveRecordRepository.getAll();
+                List<Employee> allEmployees = employeeRepository.getAll();
+                Map<Integer, Employee> employeeMap = allEmployees.stream().collect(Collectors.toMap(Employee::getId, e -> e));
+                int currentMonth = LocalDate.now().getMonthValue();
+                int currentYear = LocalDate.now().getYear();
+                List<LeaveRecord> monthly = allRecords.stream()
+                    .filter(r -> r.getStartDate().getMonthValue() == currentMonth && r.getStartDate().getYear() == currentYear)
+                    .collect(Collectors.toList());
+                pdfExportService.exportLeaveReport(monthly, employeeMap, file.getAbsolutePath());
+                showAlert("Aylık izin raporu başarıyla dışa aktarıldı.", Alert.AlertType.INFORMATION);
+            } catch (Exception e) {
+                showAlert("PDF oluşturulurken hata oluştu: " + e.getMessage(), Alert.AlertType.ERROR);
+                e.printStackTrace();
+            }
+        }
+    }
+
+    @FXML
+    private void onExportStatsReport() {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("İstatistik Raporu Export");
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("PDF Files", "*.pdf"));
+        fileChooser.setInitialFileName("istatistik_izin_raporu.pdf");
+        File file = fileChooser.showSaveDialog(null);
+        if (file != null) {
+            try {
+                // Tüm izin kayıtlarını ve çalışanları al
+                List<LeaveRecord> allRecords = leaveRecordRepository.getAll();
+                List<Employee> allEmployees = employeeRepository.getAll();
+                Map<Integer, Employee> employeeMap = allEmployees.stream().collect(Collectors.toMap(Employee::getId, e -> e));
+                // Şimdilik genel rapor fonksiyonu ile çıktı al, sonra istatistik özelleştirilebilir
+                pdfExportService.exportLeaveReport(allRecords, employeeMap, file.getAbsolutePath());
+                showAlert("İstatistik raporu başarıyla dışa aktarıldı.", Alert.AlertType.INFORMATION);
+            } catch (Exception e) {
+                showAlert("PDF oluşturulurken hata oluştu: " + e.getMessage(), Alert.AlertType.ERROR);
+                e.printStackTrace();
+            }
+        }
+    }
+
+    @FXML
     private void onClose() {
         Stage stage = (Stage) leaveTable.getScene().getWindow();
         stage.close();
@@ -339,5 +413,19 @@ public class LeaveReportController {
                 .mapToInt(record -> leaveCalculator.calculateLeaveDays(record.getStartDate(), record.getEndDate(), officialHolidays))
                 .sum();
         return employee.getAnnualLeaveDays() - totalUsed;
+    }
+
+    private void setupDatePickerLocale(DatePicker datePicker) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy").withLocale(java.util.Locale.forLanguageTag("tr-TR"));
+        datePicker.setConverter(new javafx.util.StringConverter<java.time.LocalDate>() {
+            @Override
+            public String toString(java.time.LocalDate date) {
+                return date != null ? formatter.format(date) : "";
+            }
+            @Override
+            public java.time.LocalDate fromString(String string) {
+                return (string == null || string.isEmpty()) ? null : java.time.LocalDate.parse(string, formatter);
+            }
+        });
     }
 } 

@@ -9,6 +9,7 @@
 /Users/xelil/git/leave-flow/src/main/java/com/halilsahin/leaveflow/service/PdfExportService.java
 /Users/xelil/git/leave-flow/src/main/java/com/halilsahin/leaveflow/ui/AddEmployeeController.java
 /Users/xelil/git/leave-flow/src/main/java/com/halilsahin/leaveflow/ui/AddLeaveController.java
+/Users/xelil/git/leave-flow/src/main/java/com/halilsahin/leaveflow/ui/EditEmployeeController.java
 /Users/xelil/git/leave-flow/src/main/java/com/halilsahin/leaveflow/ui/LeaveReportController.java
 /Users/xelil/git/leave-flow/src/main/java/com/halilsahin/leaveflow/ui/MainController.java
 /Users/xelil/git/leave-flow/src/main/java/com/halilsahin/leaveflow/ui/QuickAddLeaveController.java

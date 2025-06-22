@@ -621,19 +621,88 @@ public class MainController {
     }
     
     private void exportGeneralReport() {
-        showAlert("Genel rapor özelliği yakında eklenecek.", Alert.AlertType.INFORMATION);
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Genel İzin Raporu Export");
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("PDF Files", "*.pdf"));
+        fileChooser.setInitialFileName("genel_izin_raporu.pdf");
+        File file = fileChooser.showSaveDialog(null);
+        if (file != null) {
+            try {
+                List<LeaveRecord> allRecords = leaveRecordRepository.getAll();
+                List<Employee> allEmployees = employeeRepository.getAll();
+                Map<Integer, Employee> employeeMap = allEmployees.stream().collect(Collectors.toMap(Employee::getId, e -> e));
+                pdfExportService.exportLeaveReport(allRecords, employeeMap, file.getAbsolutePath());
+                showAlert("Genel izin raporu başarıyla dışa aktarıldı.", Alert.AlertType.INFORMATION);
+            } catch (Exception e) {
+                showAlert("PDF oluşturulurken hata oluştu: " + e.getMessage(), Alert.AlertType.ERROR);
+                e.printStackTrace();
+            }
+        }
     }
     
     private void exportEmployeeReport() {
-        showAlert("Çalışan raporu özelliği yakında eklenecek.", Alert.AlertType.INFORMATION);
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Çalışan Bazlı İzin Raporu Export");
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("PDF Files", "*.pdf"));
+        fileChooser.setInitialFileName("calisan_izin_raporu.pdf");
+        File file = fileChooser.showSaveDialog(null);
+        if (file != null) {
+            try {
+                List<LeaveRecord> allRecords = leaveRecordRepository.getAll();
+                List<Employee> allEmployees = employeeRepository.getAll();
+                Map<Integer, Employee> employeeMap = allEmployees.stream().collect(Collectors.toMap(Employee::getId, e -> e));
+                pdfExportService.exportLeaveReport(allRecords, employeeMap, file.getAbsolutePath());
+                showAlert("Çalışan bazlı izin raporu başarıyla dışa aktarıldı.", Alert.AlertType.INFORMATION);
+            } catch (Exception e) {
+                showAlert("PDF oluşturulurken hata oluştu: " + e.getMessage(), Alert.AlertType.ERROR);
+                e.printStackTrace();
+            }
+        }
     }
     
     private void exportMonthlyReport() {
-        showAlert("Aylık rapor özelliği yakında eklenecek.", Alert.AlertType.INFORMATION);
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Aylık İzin Raporu Export");
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("PDF Files", "*.pdf"));
+        fileChooser.setInitialFileName("aylik_izin_raporu.pdf");
+        File file = fileChooser.showSaveDialog(null);
+        if (file != null) {
+            try {
+                List<LeaveRecord> allRecords = leaveRecordRepository.getAll();
+                List<Employee> allEmployees = employeeRepository.getAll();
+                Map<Integer, Employee> employeeMap = allEmployees.stream().collect(Collectors.toMap(Employee::getId, e -> e));
+                int currentMonth = LocalDate.now().getMonthValue();
+                int currentYear = LocalDate.now().getYear();
+                List<LeaveRecord> monthly = allRecords.stream()
+                    .filter(r -> r.getStartDate().getMonthValue() == currentMonth && r.getStartDate().getYear() == currentYear)
+                    .collect(Collectors.toList());
+                pdfExportService.exportLeaveReport(monthly, employeeMap, file.getAbsolutePath());
+                showAlert("Aylık izin raporu başarıyla dışa aktarıldı.", Alert.AlertType.INFORMATION);
+            } catch (Exception e) {
+                showAlert("PDF oluşturulurken hata oluştu: " + e.getMessage(), Alert.AlertType.ERROR);
+                e.printStackTrace();
+            }
+        }
     }
     
     private void exportStatsReport() {
-        showAlert("İstatistik raporu özelliği yakında eklenecek.", Alert.AlertType.INFORMATION);
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("İstatistik Raporu Export");
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("PDF Files", "*.pdf"));
+        fileChooser.setInitialFileName("istatistik_izin_raporu.pdf");
+        File file = fileChooser.showSaveDialog(null);
+        if (file != null) {
+            try {
+                List<LeaveRecord> allRecords = leaveRecordRepository.getAll();
+                List<Employee> allEmployees = employeeRepository.getAll();
+                Map<Integer, Employee> employeeMap = allEmployees.stream().collect(Collectors.toMap(Employee::getId, e -> e));
+                pdfExportService.exportLeaveReport(allRecords, employeeMap, file.getAbsolutePath());
+                showAlert("İstatistik raporu başarıyla dışa aktarıldı.", Alert.AlertType.INFORMATION);
+            } catch (Exception e) {
+                showAlert("PDF oluşturulurken hata oluştu: " + e.getMessage(), Alert.AlertType.ERROR);
+                e.printStackTrace();
+            }
+        }
     }
     
     private void updateHolidays() {
