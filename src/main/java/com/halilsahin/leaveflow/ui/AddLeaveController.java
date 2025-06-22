@@ -13,6 +13,7 @@ import javafx.stage.Stage;
 import javafx.util.StringConverter;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -39,6 +40,8 @@ public class AddLeaveController {
 
         // Tarih seçicileri yapılandır
         setupDatePickers();
+        setupDatePickerLocale(startDatePicker);
+        setupDatePickerLocale(endDatePicker);
 
         // Değişiklikleri dinle ve izin gününü yeniden hesapla
         startDatePicker.valueProperty().addListener((obs, old, aNew) -> recalculateLeaveDays());
@@ -88,6 +91,20 @@ public class AddLeaveController {
                 super.updateItem(date, empty);
                 LocalDate start = startDatePicker.getValue();
                 setDisable(empty || (start != null && date.isBefore(start)));
+            }
+        });
+    }
+
+    private void setupDatePickerLocale(DatePicker datePicker) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy").withLocale(java.util.Locale.forLanguageTag("tr-TR"));
+        datePicker.setConverter(new javafx.util.StringConverter<java.time.LocalDate>() {
+            @Override
+            public String toString(java.time.LocalDate date) {
+                return date != null ? formatter.format(date) : "";
+            }
+            @Override
+            public java.time.LocalDate fromString(String string) {
+                return (string == null || string.isEmpty()) ? null : java.time.LocalDate.parse(string, formatter);
             }
         });
     }

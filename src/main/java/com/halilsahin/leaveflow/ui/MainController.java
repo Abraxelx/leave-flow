@@ -92,6 +92,8 @@ public class MainController {
         setupLeaveTable();
         setupFilters();
         setupSettings();
+        setupDatePickerLocale(startDateFilter);
+        setupDatePickerLocale(endDateFilter);
         
         // Tab değişikliklerini dinle
         mainTabPane.getSelectionModel().selectedItemProperty().addListener((obs, oldTab, newTab) -> {
@@ -285,6 +287,20 @@ public class MainController {
         holidayYearField.setText(String.valueOf(LocalDate.now().getYear()));
         includeDetailsCheckBox.setSelected(true);
         includeStatsCheckBox.setSelected(true);
+    }
+    
+    private void setupDatePickerLocale(DatePicker datePicker) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy").withLocale(java.util.Locale.forLanguageTag("tr-TR"));
+        datePicker.setConverter(new javafx.util.StringConverter<java.time.LocalDate>() {
+            @Override
+            public String toString(java.time.LocalDate date) {
+                return date != null ? formatter.format(date) : "";
+            }
+            @Override
+            public java.time.LocalDate fromString(String string) {
+                return (string == null || string.isEmpty()) ? null : java.time.LocalDate.parse(string, formatter);
+            }
+        });
     }
     
     private void loadLeaves() {

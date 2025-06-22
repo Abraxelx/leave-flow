@@ -5,6 +5,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import com.halilsahin.leaveflow.util.DatabaseHelper;
+import java.util.Locale;
 
 public class Main extends Application {
     @Override
@@ -21,6 +22,7 @@ public class Main extends Application {
     }
 
     public static void main(String[] args) {
+        Locale.setDefault(new Locale("tr", "TR"));
         launch(args);
     }
 } 
