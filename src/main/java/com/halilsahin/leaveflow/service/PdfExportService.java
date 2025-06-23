@@ -16,6 +16,8 @@ import com.itextpdf.layout.properties.UnitValue;
 import com.itextpdf.io.font.PdfEncodings;
 import com.itextpdf.kernel.font.PdfFont;
 import com.itextpdf.kernel.font.PdfFontFactory;
+import com.itextpdf.io.image.ImageDataFactory;
+import com.itextpdf.layout.element.Image;
 
 import java.awt.Desktop;
 import java.io.File;
@@ -57,6 +59,58 @@ public class PdfExportService {
         TURKISH_MONTHS.put("OCTOBER", "Ekim");
         TURKISH_MONTHS.put("NOVEMBER", "Kasım");
         TURKISH_MONTHS.put("DECEMBER", "Aralık");
+    }
+    
+    // Logo yükleme metodu
+    private Image loadLogo() {
+        try {
+            InputStream logoStream = getClass().getClassLoader().getResourceAsStream("logo.png");
+            if (logoStream != null) {
+                byte[] logoBytes = logoStream.readAllBytes();
+                Image logo = new Image(ImageDataFactory.create(logoBytes));
+                logo.setWidth(60);
+                logo.setHeight(60);
+                return logo;
+            }
+        } catch (Exception e) {
+            System.err.println("Logo yüklenemedi: " + e.getMessage());
+        }
+        return null;
+    }
+    
+    // PDF başlığı oluşturma metodu
+    private Table createHeaderTable(PdfFont font) {
+        Table headerTable = new Table(UnitValue.createPercentArray(new float[]{20, 80}))
+                .useAllAvailableWidth();
+        
+        // Logo hücresi
+        Cell logoCell = new Cell();
+        Image logo = loadLogo();
+        if (logo != null) {
+            logoCell.add(logo);
+        } else {
+            // Logo yüklenemezse metin alternatifi
+            logoCell.add(new Paragraph("LF").setFont(font).setFontSize(24).setBold().setFontColor(com.itextpdf.kernel.colors.ColorConstants.BLUE));
+        }
+        logoCell.setBorder(null);
+        logoCell.setTextAlignment(TextAlignment.CENTER);
+        headerTable.addCell(logoCell);
+        
+        // Başlık hücresi
+        Cell titleCell = new Cell().add(new Paragraph("LeaveFlow")
+                .setFont(font)
+                .setFontSize(24)
+                .setBold()
+                .setFontColor(com.itextpdf.kernel.colors.ColorConstants.BLUE));
+        titleCell.add(new Paragraph("Çalışan İzin Yönetim Sistemi")
+                .setFont(font)
+                .setFontSize(14)
+                .setFontColor(com.itextpdf.kernel.colors.ColorConstants.DARK_GRAY));
+        titleCell.setBorder(null);
+        titleCell.setTextAlignment(TextAlignment.CENTER);
+        headerTable.addCell(titleCell);
+        
+        return headerTable;
     }
     
     // PDF dosyasını otomatik açma metodu
@@ -158,25 +212,19 @@ public class PdfExportService {
         List<LeaveRecord> allRecords = leaveRepo.getAll();
         
         // Logo ve başlık
-        Table headerTable = new Table(UnitValue.createPercentArray(new float[]{20, 80}))
-                .useAllAvailableWidth();
-        
-        // Logo hücresi (şimdilik boş, sonra logo eklenebilir)
-        Cell logoCell = new Cell().add(new Paragraph("LF").setFont(font).setFontSize(24).setBold().setFontColor(com.itextpdf.kernel.colors.ColorConstants.GREEN));
-        logoCell.setBackgroundColor(com.itextpdf.kernel.colors.ColorConstants.LIGHT_GRAY);
-        logoCell.setBorder(null);
-        headerTable.addCell(logoCell);
-        
-        // Başlık hücresi
-        Cell titleCell = new Cell().add(new Paragraph("LeaveFlow - İzin Raporu")
-                .setFont(font)
-                .setFontSize(20)
-                .setBold()
-                .setTextAlignment(TextAlignment.CENTER));
-        titleCell.setBorder(null);
-        headerTable.addCell(titleCell);
+        Table headerTable = createHeaderTable(font);
         
         document.add(headerTable);
+        
+        document.add(new Paragraph(" ").setFont(font)); // Boşluk
+        
+        // Rapor başlığı
+        Paragraph reportTitle = new Paragraph("İzin Raporu")
+                .setFont(font)
+                .setFontSize(18)
+                .setBold()
+                .setTextAlignment(TextAlignment.CENTER);
+        document.add(reportTitle);
         
         document.add(new Paragraph(" ").setFont(font)); // Boşluk
         
@@ -285,13 +333,28 @@ public class PdfExportService {
         // Kalan izin hesapla
         int remainingLeave = calculateRemainingLeave(employee, allRecords, holidays);
         
-        // Başlık
+        // Logo ve başlık
+        Table headerTable = createHeaderTable(font);
+        document.add(headerTable);
+        
+        document.add(new Paragraph(" ").setFont(font)); // Boşluk
+        
+        // Rapor başlığı
         Paragraph title = new Paragraph("İzin Detay Raporu")
                 .setFont(font)
-                .setFontSize(20)
+                .setFontSize(18)
                 .setBold()
                 .setTextAlignment(TextAlignment.CENTER);
         document.add(title);
+        
+        document.add(new Paragraph(" ").setFont(font)); // Boşluk
+        
+        // Tarih
+        Paragraph date = new Paragraph("Rapor Tarihi: " + java.time.LocalDate.now().format(DateTimeFormatter.ofPattern("dd.MM.yyyy")))
+                .setFont(numericFont)
+                .setFontSize(12)
+                .setTextAlignment(TextAlignment.RIGHT);
+        document.add(date);
         
         document.add(new Paragraph(" ").setFont(font)); // Boşluk
         
