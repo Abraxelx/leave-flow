@@ -17,7 +17,11 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
+import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -51,6 +55,8 @@ public class MainController {
     @FXML private Button resetDatabaseButton;
     @FXML private Button updateAnnualLeavesButton;
     @FXML private Button aboutButton;
+    @FXML private ImageView logoImageView;
+    @FXML private Label textLogoLabel;
     
     // Çalışanlar Tab
     @FXML private TableView<Employee> employeeTable;
@@ -105,6 +111,7 @@ public class MainController {
     
     @FXML
     public void initialize() {
+        loadLogo();
         setupTabIcons();
         setupButtonIcons();
         loadData();
@@ -128,6 +135,30 @@ public class MainController {
         });
     }
     
+    private void loadLogo() {
+        try {
+            // Önce PNG logo yüklemeyi dene
+            Image logo = new Image(getClass().getResourceAsStream("/logo.png"));
+            logoImageView.setImage(logo);
+            logoImageView.setVisible(true);
+            textLogoLabel.setVisible(false);
+        } catch (Exception e) {
+            System.err.println("PNG logo yüklenemedi, SVG dene: " + e.getMessage());
+            try {
+                // PNG yüklenemezse SVG'yi dene
+                Image logo = new Image(getClass().getResourceAsStream("/logo.svg"));
+                logoImageView.setImage(logo);
+                logoImageView.setVisible(true);
+                textLogoLabel.setVisible(false);
+            } catch (Exception e2) {
+                System.err.println("SVG logo da yüklenemedi, metin logo kullanılıyor: " + e2.getMessage());
+                // Her ikisi de yüklenemezse metin logoyu göster
+                logoImageView.setVisible(false);
+                textLogoLabel.setVisible(true);
+            }
+        }
+    }
+    
     private void setupTabIcons() {
         employeesTab.setGraphic(new FontAwesomeIconView(FontAwesomeIcon.USERS));
         leavesTab.setGraphic(new FontAwesomeIconView(FontAwesomeIcon.CALENDAR));
@@ -144,7 +175,6 @@ public class MainController {
         restoreDatabaseButton.setGraphic(new FontAwesomeIconView(FontAwesomeIcon.UPLOAD));
         resetDatabaseButton.setGraphic(new FontAwesomeIconView(FontAwesomeIcon.ERASER));
         updateAnnualLeavesButton.setGraphic(new FontAwesomeIconView(FontAwesomeIcon.CALENDAR));
-        aboutButton.setGraphic(new FontAwesomeIconView(FontAwesomeIcon.INFO_CIRCLE));
     }
     
     private void loadData() {
@@ -532,11 +562,19 @@ public class MainController {
     
     @FXML
     private void onShowAbout() {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Hakkında");
-        alert.setHeaderText("İzin Yönetim Sistemi");
-        alert.setContentText("Geliştirici: Halil Şahin\nE-posta: halilsahin.dev@gmail.com\n© 2025");
-        alert.showAndWait();
+        try {
+            javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(getClass().getResource("/AboutDialog.fxml"));
+            javafx.scene.Parent root = loader.load();
+            javafx.scene.Scene scene = new javafx.scene.Scene(root);
+            javafx.stage.Stage stage = new javafx.stage.Stage();
+            stage.setTitle("Hakkında - LeaveFlow");
+            stage.setScene(scene);
+            stage.setResizable(false);
+            stage.initModality(javafx.stage.Modality.APPLICATION_MODAL);
+            stage.showAndWait();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
     
     // Helper Methods

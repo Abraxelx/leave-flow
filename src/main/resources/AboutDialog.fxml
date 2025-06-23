@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.geometry.Insets?>
+<VBox alignment="CENTER" spacing="16" xmlns:fx="http://javafx.com/fxml" fx:controller="com.halilsahin.leaveflow.ui.AboutDialogController">
+    <padding>
+        <Insets top="24" right="32" bottom="24" left="32" />
+    </padding>
+    <ImageView fx:id="aboutLogo" fitHeight="80" fitWidth="80" preserveRatio="true" />
+    <Label text="LeaveFlow" style="-fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: #1976D2;" />
+    <Label text="Çalışan İzin Yönetim Sistemi" style="-fx-font-size: 15px; -fx-text-fill: #666;" />
+    <Label text="Geliştirici: Halil Şahin" style="-fx-font-size: 13px; -fx-text-fill: #888;" />
+    <Label text="E-posta: halilsahin.dev@gmail.com" style="-fx-font-size: 13px; -fx-text-fill: #888;" />
+    <Label text="© 2025 Tüm hakları saklıdır." style="-fx-font-size: 12px; -fx-text-fill: #888;" />
+    <Button fx:id="closeButton" text="Kapat" onAction="#onClose" style="-fx-background-color: #1976D2; -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold; -fx-background-radius: 16; -fx-padding: 6 18; -fx-cursor: hand;" />
+</VBox> 

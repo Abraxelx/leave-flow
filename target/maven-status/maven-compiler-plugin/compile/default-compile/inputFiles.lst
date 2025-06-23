@@ -7,6 +7,7 @@
 /Users/xelil/git/leave-flow/src/main/java/com/halilsahin/leaveflow/repository/OfficialHolidayRepository.java
 /Users/xelil/git/leave-flow/src/main/java/com/halilsahin/leaveflow/service/LeaveCalculator.java
 /Users/xelil/git/leave-flow/src/main/java/com/halilsahin/leaveflow/service/PdfExportService.java
+/Users/xelil/git/leave-flow/src/main/java/com/halilsahin/leaveflow/ui/AboutDialogController.java
 /Users/xelil/git/leave-flow/src/main/java/com/halilsahin/leaveflow/ui/AddEmployeeController.java
 /Users/xelil/git/leave-flow/src/main/java/com/halilsahin/leaveflow/ui/AddLeaveController.java
 /Users/xelil/git/leave-flow/src/main/java/com/halilsahin/leaveflow/ui/EditEmployeeController.java
@@ -17,3 +18,4 @@
 /Users/xelil/git/leave-flow/src/main/java/com/halilsahin/leaveflow/util/ConfigLoader.java
 /Users/xelil/git/leave-flow/src/main/java/com/halilsahin/leaveflow/util/DatabaseHelper.java
 /Users/xelil/git/leave-flow/src/main/java/com/halilsahin/leaveflow/util/HolidayFetcher.java
+/Users/xelil/git/leave-flow/src/main/java/com/halilsahin/leaveflow/util/LogoConverter.java

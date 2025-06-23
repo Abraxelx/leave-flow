@@ -157,13 +157,26 @@ public class PdfExportService {
         LeaveRecordRepository leaveRepo = new LeaveRecordRepository();
         List<LeaveRecord> allRecords = leaveRepo.getAll();
         
-        // Başlık
-        Paragraph title = new Paragraph("İzin Raporu")
+        // Logo ve başlık
+        Table headerTable = new Table(UnitValue.createPercentArray(new float[]{20, 80}))
+                .useAllAvailableWidth();
+        
+        // Logo hücresi (şimdilik boş, sonra logo eklenebilir)
+        Cell logoCell = new Cell().add(new Paragraph("LF").setFont(font).setFontSize(24).setBold().setFontColor(com.itextpdf.kernel.colors.ColorConstants.GREEN));
+        logoCell.setBackgroundColor(com.itextpdf.kernel.colors.ColorConstants.LIGHT_GRAY);
+        logoCell.setBorder(null);
+        headerTable.addCell(logoCell);
+        
+        // Başlık hücresi
+        Cell titleCell = new Cell().add(new Paragraph("LeaveFlow - İzin Raporu")
                 .setFont(font)
                 .setFontSize(20)
                 .setBold()
-                .setTextAlignment(TextAlignment.CENTER);
-        document.add(title);
+                .setTextAlignment(TextAlignment.CENTER));
+        titleCell.setBorder(null);
+        headerTable.addCell(titleCell);
+        
+        document.add(headerTable);
         
         document.add(new Paragraph(" ").setFont(font)); // Boşluk
         
