@@ -17,6 +17,7 @@ import com.itextpdf.io.font.PdfEncodings;
 import com.itextpdf.kernel.font.PdfFont;
 import com.itextpdf.kernel.font.PdfFontFactory;
 
+import java.awt.Desktop;
 import java.io.File;
 import java.io.InputStream;
 import java.time.DayOfWeek;
@@ -56,6 +57,17 @@ public class PdfExportService {
         TURKISH_MONTHS.put("OCTOBER", "Ekim");
         TURKISH_MONTHS.put("NOVEMBER", "Kasım");
         TURKISH_MONTHS.put("DECEMBER", "Aralık");
+    }
+    
+    // PDF dosyasını otomatik açma metodu
+    private void openPdfFile(File file) {
+        try {
+            if (Desktop.isDesktopSupported()) {
+                Desktop.getDesktop().open(file);
+            }
+        } catch (Exception e) {
+            System.err.println("PDF dosyası açılamadı: " + e.getMessage());
+        }
     }
     
     // Noto Sans fontu ile Türkçe karakter ve simge desteği
@@ -235,6 +247,8 @@ public class PdfExportService {
             canvas.release();
         }
         document.close();
+        
+        openPdfFile(new File(filePath));
     }
     
     public void exportLeaveDetails(LeaveRecord record, Employee employee, String filePath) throws Exception {
@@ -349,9 +363,14 @@ public class PdfExportService {
             canvas.release();
         }
         document.close();
+        
+        openPdfFile(new File(filePath));
     }
     
     public void exportGeneralReport(List<Employee> employees, List<LeaveRecord> allRecords, List<OfficialHoliday> holidays, String filePath) throws Exception {
-        // ... existing code ...
+        // Genel rapor için exportLeaveReport metodunu kullan
+        Map<Integer, Employee> employeeMap = employees.stream()
+                .collect(Collectors.toMap(Employee::getId, e -> e));
+        exportLeaveReport(allRecords, employeeMap, filePath);
     }
 } 

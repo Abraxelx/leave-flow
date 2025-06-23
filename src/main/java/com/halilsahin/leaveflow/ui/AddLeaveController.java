@@ -165,9 +165,15 @@ public class AddLeaveController {
             }
         }
         
+        // Kalan izin hesapla (bu izin kaydından sonraki durum)
+        int remainingAfterThisLeave = 0;
+        if (leaveType.equals("Yıllık İzin")) {
+            remainingAfterThisLeave = getRemainingAnnualLeave(selectedEmployee) - leaveDays;
+        }
+        
         // Veritabanına kaydet
         LeaveRecord newRecord = new LeaveRecord(0, selectedEmployee.getId(), leaveType, startDate, endDate,
-            descriptionArea.getText(), leaveDays, dayDetails, null); // Kalan izin sonradan hesaplanacak
+            descriptionArea.getText(), leaveDays, dayDetails, remainingAfterThisLeave);
         leaveRepo.add(newRecord);
         
         showAlert(Alert.AlertType.INFORMATION, "Başarılı", "İzin kaydı başarıyla oluşturuldu.");
