@@ -22,6 +22,8 @@ import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.StringConverter;
+import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
+import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
 
 import java.io.File;
 import java.io.IOException;
@@ -36,7 +38,19 @@ public class MainController {
     
     // Ana Tab Pane
     @FXML private TabPane mainTabPane;
+    @FXML private Tab employeesTab;
+    @FXML private Tab leavesTab;
+    @FXML private Tab reportsTab;
+    @FXML private Tab settingsTab;
     @FXML private Button quickAddButton;
+    @FXML private Button addEmployeeButton;
+    @FXML private Button exportLeavesButton;
+    @FXML private Button updateHolidaysButton;
+    @FXML private Button backupDatabaseButton;
+    @FXML private Button restoreDatabaseButton;
+    @FXML private Button resetDatabaseButton;
+    @FXML private Button updateAnnualLeavesButton;
+    @FXML private Button aboutButton;
     
     // Çalışanlar Tab
     @FXML private TableView<Employee> employeeTable;
@@ -91,6 +105,8 @@ public class MainController {
     
     @FXML
     public void initialize() {
+        setupTabIcons();
+        setupButtonIcons();
         loadData();
         setupEmployeeTable();
         setupLeaveTable();
@@ -110,6 +126,25 @@ public class MainController {
                 loadHolidaysTable();
             }
         });
+    }
+    
+    private void setupTabIcons() {
+        employeesTab.setGraphic(new FontAwesomeIconView(FontAwesomeIcon.USERS));
+        leavesTab.setGraphic(new FontAwesomeIconView(FontAwesomeIcon.CALENDAR));
+        reportsTab.setGraphic(new FontAwesomeIconView(FontAwesomeIcon.BAR_CHART));
+        settingsTab.setGraphic(new FontAwesomeIconView(FontAwesomeIcon.COG));
+    }
+    
+    private void setupButtonIcons() {
+        quickAddButton.setGraphic(new FontAwesomeIconView(FontAwesomeIcon.ROCKET));
+        addEmployeeButton.setGraphic(new FontAwesomeIconView(FontAwesomeIcon.USER_PLUS));
+        exportLeavesButton.setGraphic(new FontAwesomeIconView(FontAwesomeIcon.FILE));
+        updateHolidaysButton.setGraphic(new FontAwesomeIconView(FontAwesomeIcon.REFRESH));
+        backupDatabaseButton.setGraphic(new FontAwesomeIconView(FontAwesomeIcon.DOWNLOAD));
+        restoreDatabaseButton.setGraphic(new FontAwesomeIconView(FontAwesomeIcon.UPLOAD));
+        resetDatabaseButton.setGraphic(new FontAwesomeIconView(FontAwesomeIcon.ERASER));
+        updateAnnualLeavesButton.setGraphic(new FontAwesomeIconView(FontAwesomeIcon.CALENDAR));
+        aboutButton.setGraphic(new FontAwesomeIconView(FontAwesomeIcon.INFO_CIRCLE));
     }
     
     private void loadData() {
@@ -156,20 +191,16 @@ public class MainController {
 
         // İşlem butonları
         actionsColumn.setCellFactory(column -> new TableCell<>() {
-            private final Button editButton = new Button("📝");
-            private final Button deleteButton = new Button("🗑️");
-
+            private final Button editButton = createIconButton(FontAwesomeIcon.PENCIL, "edit-button");
+            private final Button deleteButton = createIconButton(FontAwesomeIcon.TRASH, "delete-button");
+            
             {
-                editButton.setStyle("-fx-background-color: #2196F3; -fx-text-fill: white; -fx-font-size: 14px; -fx-cursor: hand; -fx-background-radius: 16; -fx-padding: 4 10;");
                 editButton.setTooltip(new Tooltip("Çalışanı Düzenle"));
                 editButton.setOnAction(event -> {
                     Employee employee = getTableView().getItems().get(getIndex());
                     handleEditEmployee(employee);
                 });
-                editButton.setOnMouseEntered(e -> editButton.setStyle("-fx-background-color: #1976D2; -fx-text-fill: white; -fx-font-size: 14px; -fx-cursor: hand; -fx-background-radius: 16; -fx-padding: 4 10;"));
-                editButton.setOnMouseExited(e -> editButton.setStyle("-fx-background-color: #2196F3; -fx-text-fill: white; -fx-font-size: 14px; -fx-cursor: hand; -fx-background-radius: 16; -fx-padding: 4 10;"));
 
-                deleteButton.setStyle("-fx-background-color: #f44336; -fx-text-fill: white; -fx-font-size: 14px; -fx-cursor: hand; -fx-background-radius: 16; -fx-padding: 4 10;");
                 deleteButton.setTooltip(new Tooltip("Çalışanı Sil"));
                 deleteButton.setOnAction(event -> {
                     Employee employee = getTableView().getItems().get(getIndex());
@@ -242,18 +273,16 @@ public class MainController {
 
         // İşlem butonları
         colLeaveActions.setCellFactory(column -> new TableCell<>() {
-            private final Button detailButton = new Button("👁️");
-            private final Button deleteButton = new Button("🗑️");
+            private final Button detailButton = createIconButton(FontAwesomeIcon.EYE, "detail-button");
+            private final Button deleteButton = createIconButton(FontAwesomeIcon.TRASH, "delete-button");
 
             {
-                detailButton.setStyle("-fx-background-color: #2196F3; -fx-text-fill: white; -fx-font-size: 12px; -fx-cursor: hand;");
-                detailButton.setTooltip(new Tooltip("İzin Detayları"));
+                detailButton.setTooltip(new Tooltip("İzin Detayını Görüntüle"));
                 detailButton.setOnAction(event -> {
                     LeaveRecord record = getTableView().getItems().get(getIndex());
                     handleShowLeaveDetails(record);
                 });
-                
-                deleteButton.setStyle("-fx-background-color: #f44336; -fx-text-fill: white; -fx-font-size: 12px; -fx-cursor: hand;");
+
                 deleteButton.setTooltip(new Tooltip("İzin Kaydını Sil"));
                 deleteButton.setOnAction(event -> {
                     LeaveRecord record = getTableView().getItems().get(getIndex());
@@ -766,5 +795,16 @@ public class MainController {
     private void showAlert(String message, Alert.AlertType alertType) {
         Alert alert = new Alert(alertType, message, ButtonType.OK);
         alert.showAndWait();
+    }
+
+    private Button createIconButton(FontAwesomeIcon icon, String styleClass) {
+        FontAwesomeIconView iconView = new FontAwesomeIconView(icon);
+        iconView.setSize("16px");
+        iconView.setStyleClass("icon");
+        Button button = new Button();
+        button.setGraphic(iconView);
+        button.getStyleClass().add(styleClass);
+        button.setStyle("-fx-background-radius: 16; -fx-padding: 4 10; -fx-cursor: hand;");
+        return button;
     }
 } 
