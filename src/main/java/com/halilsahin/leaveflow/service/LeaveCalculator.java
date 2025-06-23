@@ -10,6 +10,9 @@ import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+
+import com.halilsahin.leaveflow.model.OfficialHoliday;
 
 public class LeaveCalculator {
     
@@ -25,19 +28,20 @@ public class LeaveCalculator {
         TURKISH_DAYS.put(DayOfWeek.SUNDAY, "Pazar");
     }
     
-    public int calculateLeaveDays(LocalDate start, LocalDate end, List<LocalDate> holidays) {
+    public int calculateLeaveDays(LocalDate start, LocalDate end, List<OfficialHoliday> holidays) {
         int days = 0;
+        List<LocalDate> holidayDates = holidays.stream().map(OfficialHoliday::getDate).toList();
         for (LocalDate date = start; !date.isAfter(end); date = date.plusDays(1)) {
             if (date.getDayOfWeek() == DayOfWeek.SATURDAY || date.getDayOfWeek() == DayOfWeek.SUNDAY)
                 continue;
-            if (holidays.contains(date))
+            if (holidayDates.contains(date))
                 continue;
             days++;
         }
         return days;
     }
     
-    public String calculateLeaveDaysWithDetails(LocalDate start, LocalDate end, List<LocalDate> holidays) {
+    public String calculateLeaveDaysWithDetails(LocalDate start, LocalDate end, List<OfficialHoliday> holidays) {
         ObjectMapper mapper = new ObjectMapper();
         ArrayNode daysArray = mapper.createArrayNode();
         int totalDays = 0;
@@ -51,15 +55,18 @@ public class LeaveCalculator {
             dayNode.put("turkishDay", TURKISH_DAYS.getOrDefault(date.getDayOfWeek(), date.getDayOfWeek().toString()));
             
             boolean isWeekend = date.getDayOfWeek() == DayOfWeek.SATURDAY || date.getDayOfWeek() == DayOfWeek.SUNDAY;
-            boolean isHoliday = holidays.contains(date);
+            final LocalDate currentDate = date;
+            Optional<OfficialHoliday> holiday = holidays.stream()
+                .filter(h -> h.getDate().equals(currentDate))
+                .findFirst();
             
             if (isWeekend) {
                 dayNode.put("type", "weekend");
                 dayNode.put("reason", "Hafta Sonu");
                 dayNode.put("counted", false);
-            } else if (isHoliday) {
+            } else if (holiday.isPresent()) {
                 dayNode.put("type", "holiday");
-                dayNode.put("reason", "Resmi Tatil");
+                dayNode.put("reason", holiday.get().getDescription());
                 dayNode.put("counted", false);
             } else {
                 dayNode.put("type", "workday");

@@ -336,7 +336,7 @@ public class PdfExportService {
             
             document.add(detailsTable);
         }
-        
+
         // Footer ekle
         for (int i = 1; i <= pdf.getNumberOfPages(); i++) {
             com.itextpdf.kernel.pdf.PdfPage page = pdf.getPage(i);
@@ -349,5 +349,9 @@ public class PdfExportService {
             canvas.release();
         }
         document.close();
+    }
+    
+    public void exportGeneralReport(List<Employee> employees, List<LeaveRecord> allRecords, List<OfficialHoliday> holidays, String filePath) throws Exception {
+        // ... existing code ...
     }
 } 

@@ -96,10 +96,10 @@ public class MainController {
     private final PdfExportService pdfExportService = new PdfExportService();
     
     // Data
-    private final ObservableList<Employee> employeeList = FXCollections.observableArrayList();
-    private final ObservableList<LeaveRecord> leaveList = FXCollections.observableArrayList();
-    private final ObservableList<LeaveRecord> filteredLeaveList = FXCollections.observableArrayList();
-    private List<LocalDate> officialHolidays;
+    private List<OfficialHoliday> officialHolidays;
+    private ObservableList<Employee> employeeList = FXCollections.observableArrayList();
+    private ObservableList<LeaveRecord> allLeaveList = FXCollections.observableArrayList();
+    private ObservableList<LeaveRecord> filteredLeaveList = FXCollections.observableArrayList();
     private Map<Integer, Employee> employeeMap;
     private final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
     
@@ -148,17 +148,15 @@ public class MainController {
     }
     
     private void loadData() {
-        // Resmi tatilleri yükle
-        this.officialHolidays = holidayRepository.getAll().stream()
-                .map(OfficialHoliday::getDate)
-                .collect(Collectors.toList());
+        this.officialHolidays = holidayRepository.getAll();
         
-        // Çalışanları yükle
-        employeeList.setAll(employeeRepository.getAll());
-        employeeMap = employeeList.stream().collect(Collectors.toMap(Employee::getId, e -> e));
+        List<Employee> employees = employeeRepository.getAll();
+        employeeMap = employees.stream().collect(Collectors.toMap(Employee::getId, e -> e));
         
-        // İzinleri yükle
-        loadLeaves();
+        allLeaveList.setAll(leaveRecordRepository.getAll());
+        
+        updateEmployeeListWithLeaveInfo(employees);
+        applyFilters();
     }
     
     private void setupEmployeeTable() {
@@ -242,8 +240,7 @@ public class MainController {
             new SimpleStringProperty(cellData.getValue().getEndDate().format(dateFormatter)));
         colLeaveDuration.setCellValueFactory(cellData -> {
             LeaveRecord record = cellData.getValue();
-            int days = leaveCalculator.calculateLeaveDays(record.getStartDate(), record.getEndDate(), officialHolidays);
-            return new SimpleStringProperty(days + " gün");
+            return new SimpleStringProperty(record.getCalculatedDays() + " gün");
         });
         
         // Sıralı izin listesi (en yeni en üstte)
@@ -345,12 +342,12 @@ public class MainController {
     }
     
     private void loadLeaves() {
-        leaveList.setAll(leaveRecordRepository.getAll());
+        allLeaveList.setAll(leaveRecordRepository.getAll());
         applyFilters();
     }
     
     private void applyFilters() {
-        List<LeaveRecord> filtered = leaveList.stream()
+        List<LeaveRecord> filtered = allLeaveList.stream()
                 .filter(this::matchesEmployeeFilter)
                 .filter(this::matchesDateFilter)
                 .collect(Collectors.toList());
@@ -399,7 +396,7 @@ public class MainController {
     private int calculateRemainingLeave(Employee employee) {
         int totalUsed = leaveRecordRepository.getByEmployeeId(employee.getId()).stream()
                 .filter(record -> "Yıllık İzin".equals(record.getLeaveType()))
-                .mapToInt(record -> leaveCalculator.calculateLeaveDays(record.getStartDate(), record.getEndDate(), officialHolidays))
+                .mapToInt(LeaveRecord::getCalculatedDays)
                 .sum();
         return employee.getAnnualLeaveDays() - totalUsed;
     }
@@ -806,5 +803,13 @@ public class MainController {
         button.getStyleClass().add(styleClass);
         button.setStyle("-fx-background-radius: 16; -fx-padding: 4 10; -fx-cursor: hand;");
         return button;
+    }
+
+    private void updateEmployeeListWithLeaveInfo(List<Employee> employees) {
+        List<Employee> updatedEmployees = employees.stream().peek(emp -> {
+            int remainingLeave = calculateRemainingLeave(emp);
+            // Bu bilgi doğrudan tabloda gösterildiği için Employee nesnesini değiştirmeye gerek yok
+        }).collect(Collectors.toList());
+        employeeList.setAll(updatedEmployees);
     }
 } 

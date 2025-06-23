@@ -57,13 +57,13 @@ public class LeaveReportController {
     
     private final ObservableList<LeaveRecord> leaveList = FXCollections.observableArrayList();
     private final ObservableList<LeaveRecord> filteredList = FXCollections.observableArrayList();
-    private List<LocalDate> officialHolidays;
+    private List<OfficialHoliday> officialHolidays;
     private Map<Integer, Employee> employeeMap;
     private final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
 
     @FXML
     public void initialize() {
-        loadData();
+        loadInitialData();
         setupFilters();
         setupTable();
         loadAllLeaves();
@@ -72,15 +72,13 @@ public class LeaveReportController {
         setupDatePickerLocale(endDateFilter);
     }
 
-    private void loadData() {
+    private void loadInitialData() {
         // Çalışanları yükle
         List<Employee> employees = employeeRepository.getAll();
         employeeMap = employees.stream().collect(Collectors.toMap(Employee::getId, e -> e));
         
         // Resmi tatilleri yükle
-        officialHolidays = holidayRepository.getAll().stream()
-                .map(OfficialHoliday::getDate)
-                .collect(Collectors.toList());
+        officialHolidays = holidayRepository.getAll();
     }
 
     private void setupFilters() {
@@ -117,14 +115,13 @@ public class LeaveReportController {
             new SimpleStringProperty(cellData.getValue().getEndDate().format(dateFormatter)));
         colDuration.setCellValueFactory(cellData -> {
             LeaveRecord record = cellData.getValue();
-            int days = leaveCalculator.calculateLeaveDays(record.getStartDate(), record.getEndDate(), officialHolidays);
-            return new SimpleStringProperty(days + " gün");
+            return new SimpleStringProperty(record.getCalculatedDays() + " gün");
         });
         colRemainingLeave.setCellValueFactory(cellData -> {
             LeaveRecord record = cellData.getValue();
             Employee employee = employeeMap.get(record.getEmployeeId());
             if (employee != null) {
-                int remainingLeave = calculateRemainingLeave(employee);
+                int remainingLeave = calculateRemainingLeaveForReport(employee);
                 return new SimpleStringProperty(remainingLeave + " gün");
             } else {
                 return new SimpleStringProperty("Bilinmeyen");
@@ -237,8 +234,7 @@ public class LeaveReportController {
 
         // Toplam gün hesaplama
         int totalDays = filteredList.stream()
-                .mapToInt(record -> leaveCalculator.calculateLeaveDays(
-                    record.getStartDate(), record.getEndDate(), officialHolidays))
+                .mapToInt(LeaveRecord::getCalculatedDays)
                 .sum();
 
         // Ortalama gün hesaplama
@@ -248,8 +244,7 @@ public class LeaveReportController {
         Map<Integer, Integer> employeeLeaveDays = filteredList.stream()
                 .collect(Collectors.groupingBy(
                     LeaveRecord::getEmployeeId,
-                    Collectors.summingInt(record -> leaveCalculator.calculateLeaveDays(
-                        record.getStartDate(), record.getEndDate(), officialHolidays))
+                    Collectors.summingInt(LeaveRecord::getCalculatedDays)
                 ));
 
         Optional<Map.Entry<Integer, Integer>> topEmployee = employeeLeaveDays.entrySet().stream()
@@ -407,10 +402,10 @@ public class LeaveReportController {
     }
 
     // Çalışanın kalan izin gününü hesapla
-    private int calculateRemainingLeave(Employee employee) {
-        int totalUsed = leaveRecordRepository.getByEmployeeId(employee.getId()).stream()
-                .filter(record -> "Yıllık İzin".equals(record.getLeaveType()))
-                .mapToInt(record -> leaveCalculator.calculateLeaveDays(record.getStartDate(), record.getEndDate(), officialHolidays))
+    private int calculateRemainingLeaveForReport(Employee employee) {
+        int totalUsed = leaveList.stream()
+                .filter(record -> record.getEmployeeId() == employee.getId() && "Yıllık İzin".equals(record.getLeaveType()))
+                .mapToInt(LeaveRecord::getCalculatedDays)
                 .sum();
         return employee.getAnnualLeaveDays() - totalUsed;
     }

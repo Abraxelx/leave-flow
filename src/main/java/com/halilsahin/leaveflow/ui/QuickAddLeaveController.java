@@ -29,7 +29,7 @@ public class QuickAddLeaveController {
     private final LeaveRecordRepository leaveRepo = new LeaveRecordRepository();
     private final OfficialHolidayRepository holidayRepo = new OfficialHolidayRepository();
     private final LeaveCalculator calculator = new LeaveCalculator();
-    private List<LocalDate> officialHolidays;
+    private List<OfficialHoliday> officialHolidays;
 
     @FXML
     public void initialize() {
@@ -67,9 +67,7 @@ public class QuickAddLeaveController {
     }
 
     private void loadHolidays() {
-        this.officialHolidays = holidayRepo.getAll().stream()
-                .map(OfficialHoliday::getDate)
-                .collect(Collectors.toList());
+        this.officialHolidays = holidayRepo.getAll();
     }
 
     private void setupDatePickers() {
@@ -109,8 +107,15 @@ public class QuickAddLeaveController {
         LocalDate end = endDatePicker.getValue();
 
         if (start != null && end != null && !end.isBefore(start)) {
-            int days = calculator.calculateLeaveDays(start, end, officialHolidays);
-            calculatedDaysLabel.setText(days + " gün");
+            String detailsJson = calculator.calculateLeaveDaysWithDetails(start, end, officialHolidays);
+            try {
+                com.fasterxml.jackson.databind.JsonNode rootNode = new com.fasterxml.jackson.databind.ObjectMapper().readTree(detailsJson);
+                int days = rootNode.get("totalDays").asInt();
+                calculatedDaysLabel.setText(days + " gün");
+            } catch (Exception e) {
+                e.printStackTrace();
+                calculatedDaysLabel.setText("0 gün");
+            }
         } else {
             calculatedDaysLabel.setText("0 gün");
         }
@@ -129,8 +134,18 @@ public class QuickAddLeaveController {
             return;
         }
 
-        // İzin süresini hesapla
-        int leaveDays = calculator.calculateLeaveDays(startDate, endDate, officialHolidays);
+        // İzin süresini ve detaylarını hesapla
+        String dayDetails = calculator.calculateLeaveDaysWithDetails(startDate, endDate, officialHolidays);
+        int leaveDays = 0;
+        try {
+            com.fasterxml.jackson.databind.JsonNode rootNode = new com.fasterxml.jackson.databind.ObjectMapper().readTree(dayDetails);
+            leaveDays = rootNode.get("totalDays").asInt();
+        } catch (Exception e) {
+            e.printStackTrace();
+            showAlert(Alert.AlertType.ERROR, "Hesaplama Hatası", "İzin günleri hesaplanırken bir hata oluştu.");
+            return;
+        }
+
         if (leaveDays <= 0) {
             showAlert(Alert.AlertType.WARNING, "Geçersiz Süre", "İzin süresi 0 günden fazla olmalıdır.");
             return;
@@ -146,10 +161,8 @@ public class QuickAddLeaveController {
         }
         
         // Veritabanına kaydet
-        String dayDetails = calculator.calculateLeaveDaysWithDetails(startDate, endDate, officialHolidays);
-        
-        LeaveRecord newRecord = new LeaveRecord(0, selectedEmployee.getId(), leaveType, startDate, endDate, 
-            descriptionArea.getText(), leaveDays, dayDetails);
+        LeaveRecord newRecord = new LeaveRecord(0, selectedEmployee.getId(), leaveType, startDate, endDate,
+            descriptionArea.getText(), leaveDays, dayDetails, null);
         leaveRepo.add(newRecord);
         
         showAlert(Alert.AlertType.INFORMATION, "Başarılı", "İzin kaydı başarıyla oluşturuldu.");
@@ -159,7 +172,7 @@ public class QuickAddLeaveController {
     private int getRemainingAnnualLeave(Employee employee) {
         int totalUsed = leaveRepo.getByEmployeeId(employee.getId()).stream()
                 .filter(record -> "Yıllık İzin".equals(record.getLeaveType()))
-                .mapToInt(record -> calculator.calculateLeaveDays(record.getStartDate(), record.getEndDate(), officialHolidays))
+                .mapToInt(LeaveRecord::getCalculatedDays)
                 .sum();
         return employee.getAnnualLeaveDays() - totalUsed;
     }
